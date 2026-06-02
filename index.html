@@ -65,7 +65,29 @@
   .controls label{font-size:12px;color:var(--muted);}
   select{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);}
   .foot{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.5;}
-  @media(max-width:920px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+  /* definitions / methodology */
+  .defs{margin-top:24px;}
+  .defs>summary{list-style:none;cursor:pointer;background:var(--card);border:1px solid var(--line);
+                border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:12px;
+                font-size:15px;font-weight:800;color:var(--navy);user-select:none;}
+  .defs>summary::-webkit-details-marker{display:none;}
+  .defs>summary .chev{margin-left:auto;color:var(--gold);font-size:13px;font-weight:800;
+                      transition:transform .2s;}
+  .defs[open]>summary{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;}
+  .defs[open]>summary .chev{transform:rotate(90deg);}
+  .defs>summary .tag{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+                     letter-spacing:.6px;}
+  .defbody{background:var(--card);border:1px solid var(--line);border-top:none;
+           border-radius:0 0 14px 14px;padding:6px 22px 22px;}
+  .defgroup{margin-top:18px;}
+  .defgroup>h3{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--gold);
+               margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line);font-weight:800;}
+  .defgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .defcard{border-left:3px solid var(--gold);padding:2px 0 2px 14px;}
+  .defcard dt{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:5px;}
+  .defcard dd{margin:0;font-size:12.7px;color:#3a434c;line-height:1.5;}
+  @media(max-width:920px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}
+                          .defgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -102,6 +124,50 @@
       <div class="ph">Select a region on the map to view its Georgia Tech employee economic impact for FY25.</div>
     </div>
   </div>
+
+  <details class="defs">
+    <summary>
+      Definitions &amp; Methodology
+      <span class="tag">References</span>
+      <span class="chev">&#9656;</span>
+    </summary>
+    <div class="defbody">
+      <div class="defgroup">
+        <h3>Types of Impact</h3>
+        <dl class="defgrid">
+          <div class="defcard">
+            <dt>Direct Impacts</dt>
+            <dd>The initial economic activity that results from changes in production or expenditures by producers and/or consumers.</dd>
+          </div>
+          <div class="defcard">
+            <dt>Indirect Impacts</dt>
+            <dd>The economic activity that results from local industries buying goods and services from other local industries. This cycle of spending continues until all the money leaks out from the regional economy.</dd>
+          </div>
+          <div class="defcard">
+            <dt>Induced Impacts</dt>
+            <dd>The economic activity that results from the spending of employees' labor income. This cycle of household spending continues until all the money leaks out from the regional economy.</dd>
+          </div>
+        </dl>
+      </div>
+      <div class="defgroup">
+        <h3>Key Measures</h3>
+        <dl class="defgrid">
+          <div class="defcard">
+            <dt>Economic Output / Final Demand</dt>
+            <dd>Final value of industry production. For manufacturing companies, output is sales plus/minus changes in inventory. For service sectors, output is equal to sales. For retail and wholesale trade companies, output equals gross margin, <b>not</b> gross sales.</dd>
+          </div>
+          <div class="defcard">
+            <dt>Value Added</dt>
+            <dd>The difference between an industry's output and the cost of its intermediate inputs. This includes employee compensation, taxes on production, and gross operating surplus. This is the measure of the contribution to GDP made by the industry.</dd>
+          </div>
+          <div class="defcard">
+            <dt>Wages / Income</dt>
+            <dd>All forms of employment income, including employee compensation and proprietor income. Employee compensation is the total payroll cost paid by the employer including wages and salary, all benefits (health, retirement, etc.) and employer-paid payroll taxes (social security, unemployment, etc.).</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </details>
 
   <div class="foot">
     <b>How to read this:</b> "Direct" income is wages Georgia Tech pays to employees living in a region. "Induced" income and jobs are the additional local economic activity generated when those employees spend their wages in the regional economy. Figures reflect FY25 and Georgia Tech employees residing in Georgia (21,606 of them). Source: Georgia Tech Center for Economic Development Research.
