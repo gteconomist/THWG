@@ -1,0 +1,5 @@
+# Keep source spreadsheets and OS junk out of the public repo
+*.xlsx
+*.xls
+*.csv
+.DS_Store
