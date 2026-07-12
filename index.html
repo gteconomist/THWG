@@ -5,14 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Georgia Tech Economic Impact — FY25</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy:#003057; --gold:#B3A369; --ink:#1a1a1a; --muted:#5b6670;
     --bg:#f4f6f8; --card:#ffffff; --line:#e3e8ee;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  body{margin:0;font-family:"Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
        background:var(--bg);color:var(--ink);}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   /* logo bar (white) */
   .logobar{background:#fff;border-bottom:1px solid var(--line);padding:16px 28px;display:flex;align-items:center;gap:18px;}
   .logobar img.logo{height:70px;width:auto;display:block;}            /* official CEDR logo */
@@ -24,23 +28,39 @@
   .lockup .words .cedr{color:var(--navy);font-size:21px;font-weight:800;line-height:1.05;letter-spacing:-.3px;}
   .logobar .fy{margin-left:auto;background:var(--navy);color:#fff;font-weight:800;
                padding:7px 16px;border-radius:20px;font-size:13px;letter-spacing:.5px;}
-  /* title band (navy) */
-  header{background:var(--navy);color:#fff;padding:16px 28px;}
-  header h1{font-size:19px;font-weight:600;margin:0;line-height:1.3;}
-  header h1 b{color:var(--gold);font-weight:800;}
+  /* hero band (navy) */
+  header{background:linear-gradient(135deg,#00203a 0%,var(--navy) 55%,#0b4a78 100%);
+         color:#fff;padding:46px 28px 50px;border-bottom:4px solid var(--gold);
+         position:relative;overflow:hidden;}
+  header::before{content:"";position:absolute;right:-140px;top:-160px;width:460px;height:460px;
+                 border-radius:50%;background:radial-gradient(circle,rgba(179,163,105,.16),transparent 70%);}
+  .hero-inner{max-width:1224px;margin:0 auto;position:relative;animation:rise .6s ease both;}
+  .eyebrow{color:var(--gold);font-size:12px;font-weight:700;letter-spacing:2.2px;
+           text-transform:uppercase;margin:0 0 12px;}
+  header h1{font-size:36px;font-weight:900;margin:0;line-height:1.12;letter-spacing:-.6px;max-width:780px;}
+  header h1 b{color:var(--gold);font-weight:900;}
+  .hero-sub{font-size:16.5px;color:rgba(255,255,255,.88);margin:16px 0 0;max-width:660px;line-height:1.55;}
+  .hero-sub #heroOutput{color:var(--gold);font-weight:900;font-size:20px;}
   .wrap{max-width:1280px;margin:0 auto;padding:24px 28px 60px;}
   .intro{color:var(--muted);font-size:14.5px;max-width:820px;margin:0 0 22px;line-height:1.55;}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
-  .kpi .v{font-size:26px;font-weight:800;color:var(--navy);line-height:1.1;}
-  .kpi .l{font-size:12px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.6px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);
+       border-radius:12px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,48,87,.06);
+       transition:transform .2s,box-shadow .2s;animation:rise .55s ease both;}
+  .kpi:nth-child(2){animation-delay:.07s}.kpi:nth-child(3){animation-delay:.14s}.kpi:nth-child(4){animation-delay:.21s}
+  .kpi:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,48,87,.13);}
+  .kpi .v{font-size:28px;font-weight:900;color:var(--navy);line-height:1.1;font-variant-numeric:tabular-nums;}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:7px;text-transform:uppercase;letter-spacing:.7px;}
   .layout{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;align-items:start;}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;
+         box-shadow:0 2px 10px rgba(0,48,87,.06);animation:rise .6s ease both;animation-delay:.15s;}
   .panel h2{margin:0 0 4px;font-size:15px;color:var(--navy);}
   .panel .sub{font-size:12.5px;color:var(--muted);margin-bottom:10px;}
   .mapwrap{position:relative;}
   svg{width:100%;height:auto;display:block;}
-  .county{stroke:#fff;stroke-width:.35;cursor:pointer;transition:opacity .15s,fill .2s;}
+  .mapwrap svg{filter:drop-shadow(0 6px 16px rgba(0,48,87,.18));}
+  .county{stroke:#fff;stroke-width:.35;cursor:pointer;transition:opacity .2s,fill .25s;}
+  .county:hover{filter:brightness(1.13);}
   .region-outline{fill:none;stroke:#fff;stroke-width:1.4;pointer-events:none;}
   .dim{opacity:.28;}
   .sel-glow{stroke:var(--navy);stroke-width:1.6;}
@@ -61,6 +81,9 @@
   .stat .k small{display:block;color:var(--muted);font-size:11px;}
   .stat .val{font-size:16px;font-weight:700;color:var(--navy);}
   .pill{display:inline-block;background:#eef2f6;border-radius:6px;padding:2px 8px;font-size:11.5px;color:var(--navy);font-weight:700;margin-right:6px;}
+  .closebtn{margin-left:auto;background:none;border:none;color:var(--muted);font-size:20px;
+            cursor:pointer;line-height:1;padding:2px 7px;border-radius:6px;}
+  .closebtn:hover{background:#eef2f6;color:var(--navy);}
   .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
   .controls label{font-size:12px;color:var(--muted);}
   select{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);}
@@ -92,7 +115,8 @@
   .defcard dt{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:5px;}
   .defcard dd{margin:0;font-size:12.7px;color:#3a434c;line-height:1.5;}
   @media(max-width:920px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}
-                          .defgrid{grid-template-columns:1fr}}
+                          .defgrid{grid-template-columns:1fr}
+                          header{padding:32px 22px 36px}header h1{font-size:26px}}
 </style>
 </head>
 <body>
@@ -101,7 +125,11 @@
   <div class="fy">FY25</div>
 </div>
 <header>
-  <h1>Economic Impact Across Georgia &nbsp;·&nbsp; <b>Georgia Tech</b></h1>
+  <div class="hero-inner">
+    <p class="eyebrow">FY25 · Center for Economic Development Research</p>
+    <h1><b>Georgia Tech</b>'s Economic Impact Across Georgia</h1>
+    <p class="hero-sub">Employees living in communities across all 12 economic development regions generate <span id="heroOutput">&mdash;</span> in total economic output statewide.</p>
+  </div>
 </header>
 <div class="wrap">
   <p class="intro">Georgia Tech employees live and spend in communities across all 12 of Georgia's economic development regions. The map shows where they live; their wages and local spending ripple outward to support additional income and jobs. <b>Click any region</b> to see its FY25 numbers.</p>
@@ -128,6 +156,11 @@
     <div class="sidecol">
       <div class="panel" id="detail">
         <div class="ph">Select a region on the map to view its Georgia Tech employee economic impact for FY25.</div>
+      </div>
+      <div class="panel" id="chartpanel" style="margin-top:16px">
+        <h2>Compare the 12 regions</h2>
+        <div class="sub">Total economic output, FY25 &mdash; click a bar to select a region</div>
+        <div id="chart"></div>
       </div>
       <div class="notes">
         <div class="note"><b>Work in progress.</b> This site currently reports only the impact of Georgia Tech employees and their spending. Coming soon: the impact of all other Institute spending, as well as that of students.</div>
@@ -206,16 +239,28 @@ const fmtUSDshort = v => "$"+d3.format(".3~s")(v).replace("G","B");
 const fmtNum = v => d3.format(",.0f")(v);
 const fmtNum1 = v => d3.format(",.1f")(v);
 
-// ---- KPIs ----
+// ---- KPIs (count-up animation) ----
 const sw = IMPACT.statewide;
 const kpis = [
-  {v:fmtNum(sw.employees), l:"GT employees in Georgia"},
-  {v:fmtUSDshort(sw.wages), l:"Employee wages"},
-  {v:fmtNum(Math.round(sw.induced_employment)), l:"Induced jobs"},
-  {v:fmtUSDshort(sw.output), l:"Total economic output"},
+  {v:sw.employees, f:fmtNum, l:"GT employees in Georgia"},
+  {v:sw.wages, f:fmtUSDshort, l:"Employee wages"},
+  {v:Math.round(sw.induced_employment), f:fmtNum, l:"Induced jobs"},
+  {v:sw.output, f:fmtUSDshort, l:"Total economic output"},
 ];
-d3.select("#kpis").selectAll(".kpi").data(kpis).join("div").attr("class","kpi")
-  .html(d=>`<div class="v">${d.v}</div><div class="l">${d.l}</div>`);
+const kpiDivs = d3.select("#kpis").selectAll(".kpi").data(kpis).join("div").attr("class","kpi");
+kpiDivs.append("div").attr("class","v").text("0");
+kpiDivs.append("div").attr("class","l").text(d=>d.l);
+kpiDivs.select(".v").transition().duration(1500).delay((d,i)=>i*120).ease(d3.easeCubicOut)
+  .tween("count",function(d){
+    const interp=d3.interpolateNumber(0,d.v);
+    return t=>{this.textContent=d.f(interp(t));};
+  });
+// hero headline number counts up too
+d3.select("#heroOutput").transition().duration(1600).ease(d3.easeCubicOut)
+  .tween("count",function(){
+    const interp=d3.interpolateNumber(0,sw.output);
+    return t=>{this.textContent=fmtUSDshort(interp(t));};
+  });
 
 // ---- Map ----
 const W=720,H=720;
@@ -240,11 +285,21 @@ const counties=svg.append("g").selectAll("path").data(COUNTIES.features).join("p
   .on("click",(e,d)=>selectRegion(d.properties.region));
 
 function selectRegion(rg){
+  if(selected===rg){clearSelection();return;}   // click again to deselect
   selected=rg;
   counties.classed("dim",d=>d.properties.region!==rg)
           .classed("sel-glow",d=>d.properties.region===rg);
   renderDetail(rg);
+  highlightBar(rg);
 }
+
+function clearSelection(){
+  selected=null;
+  counties.classed("dim",false).classed("sel-glow",false);
+  d3.select("#detail").html('<div class="ph">Select a region on the map to view its Georgia Tech employee economic impact for FY25.</div>');
+  chRows.transition().duration(250).attr("opacity",1);
+}
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") clearSelection(); });
 
 // ---- Legend ----
 const order=Object.keys(IMPACT.regions).map(Number).sort((a,b)=>a-b);
@@ -271,6 +326,7 @@ function renderDetail(rg){
     <div style="display:flex;align-items:center;gap:10px;">
       <span class="sw" style="width:16px;height:16px;border-radius:4px;background:${REGION_COLORS[rg]};display:inline-block"></span>
       <div class="rname">${r.name}</div>
+      <button class="closebtn" onclick="clearSelection()" title="Clear selection">&times;</button>
     </div>
     <div class="rmeta">Region ${rg} &nbsp;•&nbsp; Georgia Tech employee impact, FY25</div>
     <div>
@@ -281,6 +337,34 @@ function renderDetail(rg){
       ${rows.map(x=>`<div class="stat"><div class="k">${x[0]}<small>${x[2]}</small></div><div class="val">${x[1]}</div></div>`).join("")}
     </div>
   `);
+}
+
+// ---- Region comparison chart ----
+const chData = order.map(r=>({r, name:IMPACT.regions[r].name, v:IMPACT.regions[r].output}))
+  .sort((a,b)=>b.v-a.v);
+const chW=340, rowH=35, chH=chData.length*rowH+2;
+const chX=d3.scaleLinear().domain([0,d3.max(chData,d=>d.v)]).range([0,chW-72]);
+const chSvg=d3.select("#chart").append("svg").attr("viewBox",`0 0 ${chW} ${chH}`);
+const chRows=chSvg.selectAll("g").data(chData).join("g")
+  .attr("class","chrow")
+  .attr("transform",(d,i)=>`translate(0,${i*rowH})`)
+  .style("cursor","pointer")
+  .on("click",(e,d)=>selectRegion(d.r))
+  .on("mouseenter",(e,d)=>counties.classed("dim",c=>c.properties.region!==d.r))
+  .on("mouseleave",()=>{ if(selected) counties.classed("dim",c=>c.properties.region!==selected); else counties.classed("dim",false);});
+chRows.append("rect").attr("width",chW).attr("height",rowH).attr("fill","transparent");
+chRows.append("text").attr("x",0).attr("y",11).attr("font-size",10.5).attr("font-weight",500)
+  .attr("fill","#3a434c").text(d=>d.name);
+chRows.append("rect").attr("class","cbar").attr("x",0).attr("y",16).attr("height",11).attr("rx",3)
+  .attr("fill",d=>REGION_COLORS[d.r]).attr("width",0)
+  .transition().duration(900).delay((d,i)=>150+i*45).ease(d3.easeCubicOut)
+  .attr("width",d=>Math.max(2.5,chX(d.v)));
+chRows.append("text").attr("class","cval")
+  .attr("x",d=>Math.max(2.5,chX(d.v))+6).attr("y",25.5)
+  .attr("font-size",10).attr("font-weight",700).attr("fill","#003057")
+  .text(d=>fmtUSDshort(d.v));
+function highlightBar(rg){
+  chRows.transition().duration(250).attr("opacity",d=>d.r===rg?1:.32);
 }
 
 // ---- Metric shading ----
