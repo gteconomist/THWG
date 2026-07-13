@@ -117,6 +117,48 @@
   @media(max-width:920px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}
                           .defgrid{grid-template-columns:1fr}
                           header{padding:32px 22px 36px}header h1{font-size:26px}}
+  /* segmented toggles */
+  .toggler{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(0,48,87,.05);}
+  .toggler button{font:inherit;font-size:12.5px;font-weight:700;border:none;background:#fff;color:var(--muted);
+                  padding:8px 15px;cursor:pointer;transition:background .15s,color .15s;}
+  .toggler button.active{background:var(--navy);color:#fff;}
+  .toggler button:not(.active):hover{background:#eef2f6;color:var(--navy);}
+  .topbar{display:flex;align-items:center;gap:12px 14px;flex-wrap:wrap;margin:0 0 20px;
+          background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+  .topbar .tlabel,.layerrow .tlabel{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+  .topbar .hint{font-size:12px;color:var(--muted);flex:1 1 260px;min-width:200px;}
+  #netbadge{display:none;align-items:center;background:var(--gold);color:#1a1a1a;font-weight:800;font-size:11px;
+            padding:4px 10px;border-radius:20px;letter-spacing:.2px;}
+  .dnet{display:inline-block;background:var(--gold);color:#1a1a1a;font-weight:800;font-size:10px;
+        padding:1px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;letter-spacing:.2px;}
+  .layerrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .layerbtn .soon{display:inline-block;background:var(--gold);color:#1a1a1a;font-size:9px;font-weight:800;
+                  padding:1px 5px;border-radius:10px;margin-left:5px;vertical-align:middle;text-transform:uppercase;letter-spacing:.3px;}
+  .seclabel{font-size:12px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.8px;margin:2px 0 10px;}
+  .seclabel span{color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:none;}
+  /* direct footprint strip */
+  .directcard{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;background:var(--navy);
+              color:#fff;border-radius:12px;padding:15px 22px;margin-bottom:26px;
+              border-left:4px solid var(--gold);animation:rise .55s ease both;animation-delay:.24s;}
+  .directcard .dc-lead{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--gold);margin-right:4px;}
+  .directcard .dc-stat{display:flex;flex-direction:column;line-height:1.1;}
+  .directcard .dc-stat b{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;}
+  .directcard .dc-stat span{font-size:11px;color:rgba(255,255,255,.72);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
+  /* layer total (detail default) */
+  .ltot .lt-head{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:2px;}
+  .ltot .lt-sub{font-size:12px;color:var(--muted);margin-bottom:12px;}
+  /* full impact table */
+  table.ftbl{width:100%;border-collapse:collapse;font-size:13px;}
+  table.ftbl th,table.ftbl td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
+  table.ftbl th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800;}
+  table.ftbl td:first-child,table.ftbl th:first-child{text-align:left;font-weight:700;color:var(--navy);}
+  table.ftbl tr.total td{border-top:2px solid var(--navy);border-bottom:none;font-weight:900;color:var(--navy);}
+  /* floating map: controls stay white, map sits on page background */
+  .mapcontrols{padding:12px 16px;margin-bottom:16px;}
+  .mapcontrols .layerrow{margin-bottom:10px;}
+  .mapcontrols .controls{margin-bottom:0;}
+  .mapwrap{background:transparent;}
+  .mapwrap #map{margin-top:2px;}
 </style>
 </head>
 <body>
@@ -128,29 +170,52 @@
   <div class="hero-inner">
     <p class="eyebrow">FY25 · Center for Economic Development Research</p>
     <h1><b>Georgia Tech</b>'s Economic Impact Across Georgia</h1>
-    <p class="hero-sub">Employees living in communities across all 12 economic development regions generate <span id="heroOutput">&mdash;</span> in total economic output statewide.</p>
+    <p class="hero-sub">Georgia Tech's employees and Institute spending together generate <span id="heroOutput">&mdash;</span> in total economic output across all 12 of Georgia's economic development regions.</p>
   </div>
 </header>
 <div class="wrap">
-  <p class="intro">Georgia Tech employees live and spend in communities across all 12 of Georgia's economic development regions. The map shows where they live; their wages and local spending ripple outward to support additional income and jobs. <b>Click any region</b> to see its FY25 numbers.</p>
+  <p class="intro">Georgia Tech's economic footprint reaches all 12 of Georgia's economic development regions &mdash; through the employees who live and spend in local communities, and through the Institute's own spending with suppliers and vendors. Use the <b>impact layer</b> switch to explore each, toggle <b>gross / net</b>, and <b>click any region</b> for its FY25 numbers.</p>
 
+  <div class="topbar">
+    <span class="tlabel">Impact basis:</span>
+    <div class="toggler" id="nettoggle">
+      <button class="netbtn active" data-net="gross">Gross impact</button>
+      <button class="netbtn" data-net="net">Net of state appropriations</button>
+    </div>
+    <span id="netbadge">Net state appropriations</span>
+    <span class="hint">Net removes the share of revenue funded by state appropriations.</span>
+  </div>
+
+  <div class="seclabel">Total economic impact <span>direct + indirect + induced</span></div>
   <div class="kpis" id="kpis"></div>
 
+  <div class="directcard" id="directcard"></div>
+
   <div class="layout">
-    <div class="panel mapwrap">
-      <div class="controls">
-        <label for="metric">Shade map by:</label>
-        <select id="metric">
-          <option value="region">Region (12 colors)</option>
-          <option value="employees">Employees</option>
-          <option value="wages">Employee wages</option>
-          <option value="total_income">Total payroll income</option>
-          <option value="induced_employment">Induced jobs</option>
-          <option value="output">Total output</option>
-        </select>
+    <div class="mapcol">
+      <div class="panel mapcontrols">
+        <div class="layerrow">
+          <span class="tlabel">Impact layer:</span>
+          <div class="toggler" id="layertoggle">
+            <button class="layerbtn active" data-layer="employees">Georgia Tech employees</button>
+            <button class="layerbtn" data-layer="institute">Institute spending</button>
+            <button class="layerbtn" data-layer="students">Student spending <span class="soon">soon</span></button>
+          </div>
+        </div>
+        <div class="controls">
+          <label for="metric">Shade map by:</label>
+          <select id="metric"></select>
+        </div>
       </div>
-      <div id="map"></div>
-      <div class="legend" id="legend"></div>
+      <div class="mapwrap">
+        <div id="map"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="notes">
+        <div class="note"><b>What's included.</b> These figures now cover both Georgia Tech employees' local impact and the impact of Institute spending. Use the <b>impact layer</b> switch on the map to explore each; the headline totals above combine both.</div>
+        <div class="note"><b>Gross vs. net.</b> Figures default to <b>gross</b> impact. Switch to <b>net</b> to remove the share of impact funded by state appropriations.</div>
+        <div class="note">These figures represent the <b>"traditional" upstream economic impact</b>. Downstream measures — the impact of Georgia Tech's research, innovation, and entrepreneurship — are being developed to provide a comprehensive view of the Institute's total impact.</div>
+      </div>
     </div>
 
     <div class="sidecol">
@@ -159,16 +224,23 @@
       </div>
       <div class="panel" id="chartpanel" style="margin-top:16px">
         <h2>Compare the 12 regions</h2>
-        <div class="sub">Total economic output, FY25 &mdash; click a bar to select a region</div>
+        <div class="sub" id="chartsub">Total economic output by region, FY25 &mdash; click a bar to select a region</div>
         <div id="chart"></div>
-      </div>
-      <div class="notes">
-        <div class="note"><b>Work in progress.</b> This site currently reports only the impact of Georgia Tech employees and their spending. Coming soon: the impact of all other Institute spending, as well as that of students.</div>
-        <div class="note">These numbers have <b>not yet been adjusted</b> for the contribution of state funds. That adjustment will be included in future updates.</div>
-        <div class="note">These figures represent the <b>"traditional" upstream economic impact</b>. Downstream measures — the impact of Georgia Tech's research, innovation, and entrepreneurship — are being developed to provide a comprehensive view of the Institute's total impact.</div>
       </div>
     </div>
   </div>
+
+  <details class="defs" id="ftdetails">
+    <summary>
+      Full impact table
+      <span class="tag">Direct · Indirect · Induced · Total</span>
+      <span class="chev">&#9656;</span>
+    </summary>
+    <div class="defbody">
+      <p class="sub" style="margin:6px 0 14px">Georgia Tech's total FY25 statewide economic impact, decomposed by impact type. These rows sum to the total. <span id="fttag"></span></p>
+      <div id="finaltable"></div>
+    </div>
+  </details>
 
   <details class="defs">
     <summary>
@@ -211,11 +283,28 @@
           </div>
         </dl>
       </div>
+      <div class="defgroup">
+        <h3>Gross, Net &amp; Sources of Impact</h3>
+        <dl class="defgrid">
+          <div class="defcard">
+            <dt>Gross vs. Net Impact</dt>
+            <dd>Gross impact is Georgia Tech's total economic footprint. Net impact removes the portion funded by state appropriations to isolate the activity attributable to the Institute's other (non-state) funding.</dd>
+          </div>
+          <div class="defcard">
+            <dt>Employee Impact</dt>
+            <dd>The compensation Georgia Tech pays to the 21,606 employees who live in Georgia, plus the additional (induced) income and jobs created when those employees spend their pay in local economies.</dd>
+          </div>
+          <div class="defcard">
+            <dt>Institute-Spending Impact</dt>
+            <dd>The activity generated by Georgia Tech's own spending: supplier and vendor purchases (indirect) and the household spending those support (induced). Direct on-campus operations are largely centralized and reported in the statewide totals.</dd>
+          </div>
+        </dl>
+      </div>
     </div>
   </details>
 
   <div class="foot">
-    <b>How to read this:</b> "Direct" income is wages Georgia Tech pays to employees living in a region. "Induced" income and jobs are the additional local economic activity generated when those employees spend their wages in the regional economy. Figures reflect FY25 and Georgia Tech employees residing in Georgia (21,606 of them). Source: Georgia Tech Center for Economic Development Research.
+    <b>How to read this:</b> The headline figures combine Georgia Tech's total statewide economic impact — direct operations and payroll, supplier purchases (indirect), and the household spending they support (induced). The map explores two layers: where Georgia Tech's 21,606 Georgia employees live and spend, and where the Institute's spending generates supplier and household activity. "Net" figures remove the share of FY25 revenue funded by state appropriations. Source: Georgia Tech Center for Economic Development Research.
   </div>
 </div>
 
@@ -223,44 +312,125 @@
 
 <script>
 const COUNTIES = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{"NAME":"Appling","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.5214,31.7108],[-82.5203,31.8384],[-82.4314,31.838],[-82.4315,31.9662],[-82.225,31.9131],[-82.1428,31.8993],[-82.0486,31.8271],[-82.133,31.7734],[-82.1328,31.4713],[-82.2266,31.5307],[-82.5214,31.7108]]]},"id":"13001"},{"type":"Feature","properties":{"NAME":"Barrow","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.647,33.9062],[-83.7638,33.8967],[-83.7991,33.9298],[-83.8691,34.0043],[-83.8177,34.1275],[-83.7675,34.0664],[-83.5632,34.0318],[-83.5374,33.9659],[-83.647,33.9062]]]},"id":"13013"},{"type":"Feature","properties":{"NAME":"Bryan","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.3917,32.0959],[-81.3235,32.0199],[-81.2855,31.943],[-81.1385,31.8559],[-81.177,31.8161],[-81.1547,31.7262],[-81.1607,31.7281],[-81.1928,31.7332],[-81.1984,31.7261],[-81.3558,31.8149],[-81.4077,31.9443],[-81.4758,31.9743],[-81.5934,31.9714],[-81.6044,32.0109],[-81.7187,32.0894],[-81.7809,32.1529],[-81.4358,32.2413],[-81.3917,32.0959]]]},"id":"13029"},{"type":"Feature","properties":{"NAME":"Candler","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-81.9691,32.2688],[-81.9998,32.2762],[-82.0253,32.2789],[-82.2328,32.3188],[-82.2528,32.3533],[-82.1483,32.5204],[-82.0302,32.5388],[-81.9187,32.4154],[-81.9691,32.2688]]]},"id":"13043"},{"type":"Feature","properties":{"NAME":"Chattooga","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.5137,34.5241],[-85.5137,34.5242],[-85.5139,34.5252],[-85.5271,34.5887],[-85.1077,34.5875],[-85.1805,34.436],[-85.3349,34.3697],[-85.3874,34.2861],[-85.4623,34.2864],[-85.5023,34.474],[-85.5025,34.4745],[-85.5084,34.5012],[-85.5121,34.5183],[-85.5137,34.5241]]]},"id":"13055"},{"type":"Feature","properties":{"NAME":"Clarke","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.36,34.0406],[-83.2584,33.9991],[-83.2409,33.9044],[-83.2759,33.848],[-83.5374,33.9659],[-83.36,34.0406]]]},"id":"13059"},{"type":"Feature","properties":{"NAME":"Colquitt","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.9994,31.335],[-83.6541,31.3307],[-83.5126,31.3274],[-83.5098,31.2062],[-83.5749,31.0781],[-83.574,31.0339],[-83.7362,31.0377],[-84.0039,31.0416],[-84.0036,31.0773],[-83.9994,31.335]]]},"id":"13071"},{"type":"Feature","properties":{"NAME":"Crawford","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.7011,32.6916],[-83.7668,32.6926],[-84.0034,32.5299],[-84.105,32.6734],[-84.2026,32.69],[-84.1243,32.8496],[-83.8919,32.8484],[-83.8244,32.7419],[-83.7012,32.6922],[-83.7011,32.6916]]]},"id":"13079"},{"type":"Feature","properties":{"NAME":"Dodge","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-83.3465,32.2725],[-83.3047,32.342],[-83.1733,32.4525],[-83.139,32.4231],[-82.991,32.1473],[-82.8848,32.1961],[-82.8718,32.1827],[-82.9279,32.1353],[-82.9346,32.1533],[-82.9555,32.1353],[-82.9421,32.1241],[-83.2057,31.9003],[-83.2921,31.9845],[-83.3373,32.1059],[-83.2911,32.1788],[-83.3465,32.2725]]]},"id":"13091"},{"type":"Feature","properties":{"NAME":"Emanuel","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.6477,32.5125],[-82.5944,32.5792],[-82.4651,32.6468],[-82.4994,32.6863],[-82.4341,32.7623],[-82.3165,32.8358],[-82.145,32.8127],[-82.0824,32.6631],[-82.0012,32.6069],[-82.0268,32.5552],[-82.0302,32.5388],[-82.1483,32.5204],[-82.2528,32.3533],[-82.2328,32.3188],[-82.3545,32.2922],[-82.4091,32.3538],[-82.3819,32.4406],[-82.4889,32.4918],[-82.6477,32.5125]]]},"id":"13107"},{"type":"Feature","properties":{"NAME":"Fayette","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.4975,33.2574],[-84.6272,33.4401],[-84.6095,33.5025],[-84.4587,33.5509],[-84.3818,33.4634],[-84.3881,33.3525],[-84.4329,33.2565],[-84.4975,33.2574]]]},"id":"13113"},{"type":"Feature","properties":{"NAME":"Gilmer","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.6544,34.5489],[-84.6545,34.5832],[-84.6571,34.7289],[-84.5823,34.8251],[-84.6186,34.8554],[-84.4291,34.855],[-84.3147,34.8073],[-84.1968,34.6179],[-84.2551,34.5683],[-84.3456,34.5627],[-84.6544,34.5489]]]},"id":"13123"},{"type":"Feature","properties":{"NAME":"Wheeler","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.6555,32.2976],[-82.6129,32.1615],[-82.5981,32.0144],[-82.5437,31.9589],[-82.6457,31.9189],[-82.7291,32.0069],[-82.8877,32.0799],[-82.9279,32.1353],[-82.8718,32.1827],[-82.8848,32.1961],[-82.722,32.3093],[-82.6555,32.2976]]]},"id":"13309"},{"type":"Feature","properties":{"NAME":"Whitfield","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.9799,34.9876],[-84.977,34.9877],[-84.9556,34.9878],[-84.9444,34.9879],[-84.9393,34.9879],[-84.8613,34.9878],[-84.858,34.9877],[-84.8318,34.988],[-84.824,34.9877],[-84.8205,34.9879],[-84.8173,34.9878],[-84.8107,34.9876],[-84.8105,34.9876],[-84.8187,34.877],[-84.8785,34.7796],[-84.8649,34.7074],[-84.9337,34.7068],[-84.9135,34.6341],[-85.0504,34.6225],[-85.0508,34.72],[-85.1689,34.7203],[-85.1448,34.7676],[-85.0616,34.8195],[-84.9799,34.9876]]]},"id":"13313"},{"type":"Feature","properties":{"NAME":"Wilkinson","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.3577,32.9261],[-83.1596,33.0028],[-83.0736,32.9466],[-82.947,32.7594],[-82.9464,32.7413],[-82.9571,32.7083],[-82.9576,32.7082],[-83.2265,32.5842],[-83.407,32.8982],[-83.4068,32.8984],[-83.3577,32.9261]]]},"id":"13319"},{"type":"Feature","properties":{"NAME":"Glascock","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.432,33.2748],[-82.6619,33.1263],[-82.7483,33.2383],[-82.7472,33.2477],[-82.7558,33.2534],[-82.5598,33.3273],[-82.432,33.2748]]]},"id":"13125"},{"type":"Feature","properties":{"NAME":"Gordon","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.6545,34.5832],[-84.6544,34.5489],[-84.6532,34.4126],[-84.8629,34.3966],[-85.0058,34.3924],[-85.0868,34.4013],[-85.0692,34.5872],[-85.0605,34.5872],[-85.0604,34.6225],[-85.0552,34.6224],[-85.0551,34.6224],[-85.0504,34.6225],[-84.9135,34.6341],[-84.8638,34.6086],[-84.7165,34.6229],[-84.6545,34.5832]]]},"id":"13129"},{"type":"Feature","properties":{"NAME":"Grady","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.3807,30.6897],[-84.3766,31.0789],[-84.1166,31.078],[-84.1191,30.981],[-84.077,30.9156],[-84.0838,30.676],[-84.2812,30.6853],[-84.2826,30.6853],[-84.3807,30.6897]]]},"id":"13131"},{"type":"Feature","properties":{"NAME":"Hall","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-84.0628,34.1679],[-83.9891,34.1957],[-83.9273,34.2794],[-83.9571,34.334],[-83.9806,34.4184],[-83.8434,34.5055],[-83.6664,34.5036],[-83.6153,34.4317],[-83.6695,34.3667],[-83.6201,34.2953],[-83.8177,34.1275],[-83.868,34.0983],[-84.0628,34.1679]]]},"id":"13139"},{"type":"Feature","properties":{"NAME":"Jackson","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.36,34.0406],[-83.5374,33.9659],[-83.5632,34.0318],[-83.7675,34.0664],[-83.8177,34.1275],[-83.6201,34.2953],[-83.4804,34.262],[-83.4024,34.1975],[-83.36,34.0406]]]},"id":"13157"},{"type":"Feature","properties":{"NAME":"Jones","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.3577,32.9261],[-83.4068,32.8984],[-83.407,32.8982],[-83.4077,32.8978],[-83.5135,32.8449],[-83.6582,32.8879],[-83.7107,32.9528],[-83.747,33.0634],[-83.816,33.1318],[-83.5459,33.1719],[-83.4291,33.1854],[-83.415,33.1128],[-83.3804,32.9981],[-83.3577,32.9261]]]},"id":"13169"},{"type":"Feature","properties":{"NAME":"Laurens","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-83.2265,32.5842],[-82.9576,32.7082],[-82.9571,32.7083],[-82.8628,32.7158],[-82.6686,32.6122],[-82.6477,32.5125],[-82.7371,32.338],[-82.722,32.3093],[-82.8848,32.1961],[-82.991,32.1473],[-83.139,32.4231],[-83.2265,32.5842]]]},"id":"13175"},{"type":"Feature","properties":{"NAME":"Lumpkin","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-83.8434,34.5055],[-83.9806,34.4184],[-84.102,34.4645],[-84.191,34.5392],[-84.1886,34.6027],[-84.158,34.6482],[-84.0365,34.6419],[-83.939,34.7409],[-83.8565,34.7222],[-83.8773,34.6296],[-83.8434,34.5055]]]},"id":"13187"},{"type":"Feature","properties":{"NAME":"Marion","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.6493,32.233],[-84.6589,32.2329],[-84.6573,32.4949],[-84.6373,32.5349],[-84.4444,32.5621],[-84.3923,32.414],[-84.4302,32.1663],[-84.4312,32.1341],[-84.5271,32.1346],[-84.6493,32.233]]]},"id":"13197"},{"type":"Feature","properties":{"NAME":"Miller","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.9224,31.0726],[-84.9174,31.256],[-84.6417,31.259],[-84.5371,31.2559],[-84.5427,31.079],[-84.7309,31.0692],[-84.9224,31.0726]]]},"id":"13201"},{"type":"Feature","properties":{"NAME":"Newton","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.6822,33.5262],[-83.6746,33.4872],[-83.8249,33.4373],[-83.8631,33.3683],[-83.9239,33.4442],[-84.0445,33.5258],[-84.0249,33.5475],[-84.0243,33.5482],[-83.9727,33.6055],[-83.9148,33.7442],[-83.7773,33.6583],[-83.6809,33.5969],[-83.6874,33.5886],[-83.6871,33.5824],[-83.6814,33.5779],[-83.6777,33.5712],[-83.6822,33.5262]]]},"id":"13217"},{"type":"Feature","properties":{"NAME":"Peach","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.8467,32.4685],[-84.0085,32.5218],[-84.0011,32.5206],[-84.0034,32.5299],[-83.7668,32.6926],[-83.7011,32.6916],[-83.7199,32.5318],[-83.8467,32.4685]]]},"id":"13225"},{"type":"Feature","properties":{"NAME":"Polk","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.9227,34.0825],[-84.9787,33.9514],[-85.0503,33.9045],[-85.3867,33.9017],[-85.3988,33.9641],[-85.4217,34.0808],[-85.2576,34.1007],[-85.0469,34.0964],[-84.9227,34.0825]]]},"id":"13233"},{"type":"Feature","properties":{"NAME":"Randolph","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.9586,31.7779],[-84.9103,31.7768],[-84.907,31.9245],[-84.6558,31.9203],[-84.5998,31.9202],[-84.6031,31.772],[-84.5355,31.6818],[-84.5469,31.6212],[-84.8178,31.6198],[-84.9424,31.6187],[-84.9586,31.7779]]]},"id":"13243"},{"type":"Feature","properties":{"NAME":"Seminole","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.0221,31.0755],[-85.0019,31.075],[-84.9999,31.0747],[-84.9224,31.0726],[-84.7309,31.0692],[-84.7559,30.8853],[-84.8635,30.7115],[-84.8647,30.7115],[-84.8961,30.7506],[-84.9419,30.888],[-84.9596,30.9106],[-84.9835,30.9355],[-84.9986,30.9714],[-85.0024,31.0007],[-84.9994,31.0138],[-85.0221,31.0755]]]},"id":"13253"},{"type":"Feature","properties":{"NAME":"Taliaferro","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.68,33.5998],[-82.7513,33.5101],[-82.8153,33.5211],[-82.852,33.4435],[-83.0129,33.4692],[-83.014,33.5804],[-82.9511,33.658],[-82.9956,33.6936],[-82.9889,33.7063],[-82.949,33.7333],[-82.8906,33.6329],[-82.813,33.6558],[-82.68,33.5998]]]},"id":"13265"},{"type":"Feature","properties":{"NAME":"Tift","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.3387,31.476],[-83.4345,31.3504],[-83.4606,31.3263],[-83.5126,31.3274],[-83.6541,31.3307],[-83.6494,31.568],[-83.649,31.5965],[-83.5007,31.594],[-83.3387,31.476]]]},"id":"13277"},{"type":"Feature","properties":{"NAME":"Troup","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-85.2365,33.1296],[-84.939,33.2247],[-84.8624,33.1912],[-84.8618,32.8725],[-85.1841,32.8705],[-85.2219,33.0555],[-85.2233,33.0626],[-85.2324,33.1081],[-85.2365,33.1296]]]},"id":"13285"},{"type":"Feature","properties":{"NAME":"Upson","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-84.2026,32.69],[-84.2862,32.7476],[-84.391,32.787],[-84.5069,32.8818],[-84.527,32.9705],[-84.4897,32.9937],[-84.2701,32.991],[-84.1224,32.9896],[-84.1233,32.9322],[-84.1243,32.8496],[-84.2026,32.69]]]},"id":"13293"},{"type":"Feature","properties":{"NAME":"Washington","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.6619,33.1263],[-82.5502,33.0192],[-82.5109,32.9178],[-82.5211,32.8224],[-82.7684,32.7691],[-82.8025,32.8098],[-82.947,32.7594],[-83.0736,32.9466],[-83.0522,33.0807],[-82.8889,33.1386],[-82.855,33.1964],[-82.7483,33.2383],[-82.6619,33.1263]]]},"id":"13303"},{"type":"Feature","properties":{"NAME":"Heard","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-85.2939,33.4281],[-85.0154,33.4255],[-84.939,33.2247],[-85.2365,33.1296],[-85.2939,33.4281]]]},"id":"13149"},{"type":"Feature","properties":{"NAME":"Cobb","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.7244,33.8819],[-84.7378,34.0794],[-84.7292,34.0792],[-84.7226,34.0792],[-84.7219,34.0791],[-84.6872,34.0785],[-84.6847,34.0785],[-84.6828,34.0784],[-84.6764,34.0783],[-84.6749,34.0782],[-84.6739,34.0783],[-84.6726,34.0782],[-84.6592,34.078],[-84.522,34.0754],[-84.4189,34.0733],[-84.383,33.9638],[-84.4427,33.9015],[-84.4801,33.8173],[-84.5781,33.7435],[-84.6199,33.805],[-84.7241,33.8062],[-84.724,33.8153],[-84.7252,33.817],[-84.725,33.8199],[-84.7244,33.8819]]]},"id":"13067"},{"type":"Feature","properties":{"NAME":"Coffee","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.6273,31.6727],[-82.5975,31.4693],[-82.6282,31.4694],[-82.629,31.3639],[-82.8175,31.3645],[-82.8441,31.4033],[-83.1405,31.4204],[-83.139,31.4278],[-83.1359,31.4305],[-83.1394,31.4365],[-83.1386,31.4415],[-83.1449,31.4546],[-83.1505,31.4568],[-83.1508,31.4623],[-83.1459,31.4689],[-83.1456,31.4723],[-82.9984,31.6732],[-82.9957,31.781],[-82.8631,31.783],[-82.8364,31.8162],[-82.8366,31.6714],[-82.6273,31.6727]]]},"id":"13069"},{"type":"Feature","properties":{"NAME":"Columbia","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.1166,33.5897],[-82.0988,33.5864],[-82.069,33.5754],[-82.0463,33.5638],[-82.0282,33.5449],[-82.2942,33.3546],[-82.4368,33.5497],[-82.4253,33.6506],[-82.3064,33.7006],[-82.2186,33.6863],[-82.1966,33.6306],[-82.1799,33.6159],[-82.135,33.591],[-82.1291,33.5899],[-82.1248,33.5913],[-82.1166,33.5897]]]},"id":"13073"},{"type":"Feature","properties":{"NAME":"Coweta","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-84.939,33.2247],[-85.0154,33.4255],[-84.8507,33.5115],[-84.6095,33.5025],[-84.6272,33.4401],[-84.4975,33.2574],[-84.5089,33.2452],[-84.5003,33.2334],[-84.5024,33.2211],[-84.8524,33.2236],[-84.8624,33.1912],[-84.939,33.2247]]]},"id":"13077"},{"type":"Feature","properties":{"NAME":"Crisp","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-83.9613,32.0306],[-83.6097,32.0279],[-83.6123,31.8541],[-83.6126,31.8041],[-83.8022,31.8035],[-83.9394,31.8479],[-83.9382,31.8495],[-83.9378,31.8548],[-83.9367,31.858],[-83.9323,31.8592],[-83.9265,31.8633],[-83.9287,31.8718],[-83.9312,31.877],[-83.9341,31.8814],[-83.9321,31.8846],[-83.9287,31.8869],[-83.9323,31.8938],[-83.932,31.8988],[-83.9274,31.9041],[-83.9251,31.9057],[-83.9225,31.9097],[-83.9613,32.0306]]]},"id":"13081"},{"type":"Feature","properties":{"NAME":"Decatur","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.5081,31.0784],[-84.3766,31.0789],[-84.3807,30.6897],[-84.535,30.6965],[-84.5394,30.6968],[-84.6062,30.6999],[-84.6064,30.6999],[-84.8635,30.7115],[-84.7559,30.8853],[-84.7309,31.0692],[-84.5427,31.079],[-84.5081,31.0784]]]},"id":"13087"},{"type":"Feature","properties":{"NAME":"Dooly","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.0279,32.1711],[-83.9651,32.248],[-83.8484,32.291],[-83.6156,32.2886],[-83.6085,32.1184],[-83.6084,32.1165],[-83.6097,32.0279],[-83.9613,32.0306],[-84.0279,32.1711]]]},"id":"13093"},{"type":"Feature","properties":{"NAME":"Dougherty","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.4504,31.6219],[-84.2978,31.622],[-84.0432,31.6236],[-84.0184,31.6503],[-83.9826,31.4635],[-83.9977,31.4628],[-83.9978,31.4438],[-84.1411,31.4402],[-84.4299,31.4367],[-84.4504,31.6219]]]},"id":"13095"},{"type":"Feature","properties":{"NAME":"Echols","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.1366,30.6243],[-83.1362,30.7752],[-83.0881,30.8487],[-83.0194,30.8495],[-83.014,30.8447],[-83.0066,30.8595],[-82.9939,30.8608],[-82.9822,30.8722],[-82.9713,30.8694],[-82.8464,30.835],[-82.7662,30.7324],[-82.604,30.7137],[-82.584,30.5918],[-82.6893,30.5977],[-82.6895,30.5977],[-82.6986,30.5982],[-82.6989,30.5983],[-82.8773,30.609],[-82.8788,30.6091],[-83.1366,30.6243]]]},"id":"13101"},{"type":"Feature","properties":{"NAME":"Effingham","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.3482,32.5693],[-81.3288,32.5612],[-81.3183,32.5597],[-81.2868,32.5448],[-81.2754,32.5395],[-81.199,32.4673],[-81.168,32.3684],[-81.1409,32.3494],[-81.1343,32.3417],[-81.1223,32.3054],[-81.1203,32.2858],[-81.128,32.2763],[-81.1255,32.2271],[-81.1956,32.2375],[-81.3917,32.0959],[-81.4358,32.2413],[-81.5427,32.4174],[-81.548,32.4893],[-81.5386,32.5091],[-81.3893,32.5954],[-81.3482,32.5693]]]},"id":"13103"},{"type":"Feature","properties":{"NAME":"Evans","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-81.9691,32.2688],[-81.8163,32.2375],[-81.7809,32.1529],[-81.7187,32.0894],[-81.7617,32.0479],[-81.98,32.0815],[-82.0253,32.2789],[-81.9998,32.2762],[-81.9691,32.2688]]]},"id":"13109"},{"type":"Feature","properties":{"NAME":"Floyd","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.0692,34.5872],[-85.0868,34.4013],[-85.0058,34.3924],[-85.0469,34.0964],[-85.2576,34.1007],[-85.4217,34.0808],[-85.4551,34.2507],[-85.4554,34.2529],[-85.4581,34.2657],[-85.4587,34.2694],[-85.4623,34.2864],[-85.3874,34.2861],[-85.3349,34.3697],[-85.1805,34.436],[-85.1077,34.5875],[-85.0692,34.5872]]]},"id":"13115"},{"type":"Feature","properties":{"NAME":"Franklin","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-83.3553,34.2237],[-83.3939,34.3248],[-83.3984,34.4609],[-83.1778,34.477],[-83.1069,34.5341],[-83.0872,34.5159],[-83.0727,34.5043],[-83.0522,34.4931],[-83.0942,34.4159],[-83.1134,34.2735],[-83.1727,34.2385],[-83.2973,34.2646],[-83.3553,34.2237]]]},"id":"13119"},{"type":"Feature","properties":{"NAME":"Atkinson","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.9712,31.184],[-83.0469,31.1837],[-83.0335,31.2747],[-83.1405,31.4204],[-82.8441,31.4033],[-82.8175,31.3645],[-82.629,31.3639],[-82.6296,31.2747],[-82.6992,31.2781],[-82.6717,31.1837],[-82.9712,31.184]]]},"id":"13003"},{"type":"Feature","properties":{"NAME":"Bacon","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.5214,31.7108],[-82.2266,31.5307],[-82.3448,31.4301],[-82.4172,31.4171],[-82.4947,31.4687],[-82.5975,31.4693],[-82.6273,31.6727],[-82.5214,31.6725],[-82.5214,31.7108]]]},"id":"13005"},{"type":"Feature","properties":{"NAME":"Baldwin","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.1596,33.0028],[-83.3577,32.9261],[-83.3804,32.9981],[-83.415,33.1128],[-83.4291,33.1854],[-83.2741,33.1872],[-83.0975,33.1514],[-83.1008,33.0498],[-83.0522,33.0807],[-83.0736,32.9466],[-83.1596,33.0028]]]},"id":"13009"},{"type":"Feature","properties":{"NAME":"Bartow","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.0058,34.3924],[-84.8629,34.3966],[-84.6532,34.4126],[-84.6592,34.078],[-84.6726,34.0782],[-84.6739,34.0783],[-84.6749,34.0782],[-84.6764,34.0783],[-84.6828,34.0784],[-84.6847,34.0785],[-84.6872,34.0785],[-84.7219,34.0791],[-84.7226,34.0792],[-84.7292,34.0792],[-84.7378,34.0794],[-84.9227,34.0825],[-85.0469,34.0964],[-85.0058,34.3924]]]},"id":"13015"},{"type":"Feature","properties":{"NAME":"Bleckley","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-83.2265,32.5842],[-83.139,32.4231],[-83.1733,32.4525],[-83.3047,32.342],[-83.3465,32.2725],[-83.498,32.4017],[-83.4826,32.4245],[-83.4979,32.4522],[-83.2265,32.5842]]]},"id":"13023"},{"type":"Feature","properties":{"NAME":"Brantley","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-81.936,31.048],[-82.0609,31.0758],[-82.1317,31.0107],[-82.2083,31.0848],[-82.2087,31.1709],[-82.2846,31.2244],[-82.1948,31.2076],[-82.1001,31.2767],[-82.0068,31.2771],[-82.0411,31.3737],[-81.9232,31.3459],[-81.8011,31.3637],[-81.7317,31.33],[-81.7663,31.1696],[-81.936,31.048]]]},"id":"13025"},{"type":"Feature","properties":{"NAME":"Bulloch","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.7809,32.1529],[-81.8163,32.2375],[-81.9691,32.2688],[-81.9187,32.4154],[-82.0302,32.5388],[-82.0268,32.5552],[-82.0012,32.6069],[-81.841,32.6491],[-81.6896,32.5463],[-81.548,32.4893],[-81.5427,32.4174],[-81.4358,32.2413],[-81.7809,32.1529]]]},"id":"13031"},{"type":"Feature","properties":{"NAME":"Calhoun","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.5469,31.6212],[-84.4504,31.6213],[-84.4504,31.6219],[-84.4299,31.4367],[-84.6376,31.4339],[-84.789,31.4364],[-84.8198,31.5012],[-84.8178,31.6198],[-84.5469,31.6212]]]},"id":"13037"},{"type":"Feature","properties":{"NAME":"Charlton","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.1317,31.0107],[-82.0609,31.0758],[-81.936,31.048],[-81.892,30.9605],[-81.906,30.8222],[-81.9998,30.7883],[-82.0232,30.782],[-82.0504,30.6763],[-82.0494,30.6553],[-82.0376,30.6333],[-82.0133,30.5957],[-82.0055,30.5635],[-82.017,30.5194],[-82.0161,30.4974],[-82.05,30.3625],[-82.0501,30.3623],[-82.1248,30.3666],[-82.1652,30.358],[-82.1715,30.3599],[-82.1896,30.3762],[-82.2042,30.4013],[-82.2103,30.4246],[-82.206,30.4555],[-82.2123,30.4996],[-82.2144,30.567],[-82.2148,30.567],[-82.1499,30.7843],[-82.4204,30.7952],[-82.4156,31.0136],[-82.1317,31.0107]]]},"id":"13049"},{"type":"Feature","properties":{"NAME":"Chattahoochee","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.9236,32.2315],[-84.9216,32.2333],[-84.9091,32.2635],[-84.9166,32.2812],[-84.9387,32.3007],[-85.0019,32.322],[-85.0071,32.3284],[-85.0081,32.3367],[-84.9874,32.3812],[-84.9873,32.3816],[-84.8487,32.4146],[-84.8442,32.4132],[-84.8344,32.4132],[-84.824,32.414],[-84.8146,32.4144],[-84.8114,32.4186],[-84.8094,32.4209],[-84.8052,32.4189],[-84.7986,32.416],[-84.7915,32.4148],[-84.7885,32.418],[-84.783,32.4217],[-84.7816,32.4229],[-84.7784,32.4231],[-84.7746,32.4218],[-84.7694,32.4223],[-84.6945,32.5187],[-84.6863,32.5196],[-84.6782,32.5189],[-84.6617,32.5291],[-84.658,32.5288],[-84.649,32.535],[-84.6373,32.5349],[-84.6573,32.4949],[-84.6589,32.2329],[-84.9236,32.2315]]]},"id":"13053"},{"type":"Feature","properties":{"NAME":"Cherokee","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.2581,34.3352],[-84.2587,34.1859],[-84.3283,34.1861],[-84.4189,34.0733],[-84.522,34.0754],[-84.6592,34.078],[-84.6532,34.4126],[-84.5826,34.3815],[-84.2576,34.381],[-84.2577,34.3751],[-84.2578,34.3726],[-84.2581,34.3352]]]},"id":"13057"},{"type":"Feature","properties":{"NAME":"Clayton","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.3881,33.3525],[-84.3818,33.4634],[-84.4587,33.5509],[-84.4586,33.5562],[-84.4589,33.5598],[-84.4589,33.5659],[-84.4586,33.5721],[-84.4584,33.5727],[-84.4586,33.5865],[-84.4585,33.6086],[-84.4577,33.6489],[-84.3653,33.6478],[-84.3602,33.6479],[-84.3502,33.6479],[-84.2826,33.647],[-84.2813,33.6474],[-84.2835,33.5025],[-84.3536,33.4362],[-84.3544,33.3525],[-84.3881,33.3525]]]},"id":"13063"},{"type":"Feature","properties":{"NAME":"Wilkes","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.6455,33.9842],[-82.5935,33.8273],[-82.4795,33.6395],[-82.6497,33.6088],[-82.6524,33.6112],[-82.6559,33.6066],[-82.6522,33.5967],[-82.6566,33.5968],[-82.6591,33.603],[-82.6703,33.6041],[-82.68,33.5998],[-82.813,33.6558],[-82.8906,33.6329],[-82.949,33.7333],[-82.9873,33.7807],[-82.8746,33.9218],[-82.7795,33.9711],[-82.6455,33.9842]]]},"id":"13317"},{"type":"Feature","properties":{"NAME":"Worth","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.9394,31.8479],[-83.8022,31.8035],[-83.7869,31.6228],[-83.6494,31.568],[-83.6541,31.3307],[-83.9994,31.335],[-83.9978,31.4438],[-83.9977,31.4628],[-83.9826,31.4635],[-84.0184,31.6503],[-84.0323,31.7168],[-83.9394,31.8479]]]},"id":"13321"},{"type":"Feature","properties":{"NAME":"Habersham","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-83.3525,34.716],[-83.3514,34.7145],[-83.351,34.7132],[-83.3513,34.7017],[-83.3382,34.6879],[-83.3379,34.6877],[-83.4598,34.4811],[-83.5375,34.4917],[-83.6153,34.4317],[-83.6664,34.5036],[-83.6155,34.5529],[-83.6628,34.6598],[-83.6233,34.7322],[-83.6816,34.8006],[-83.6669,34.8065],[-83.6579,34.8137],[-83.6522,34.823],[-83.5869,34.82],[-83.549,34.7495],[-83.3524,34.7161],[-83.3525,34.716]]]},"id":"13137"},{"type":"Feature","properties":{"NAME":"Hancock","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-83.0522,33.0807],[-83.1008,33.0498],[-83.0975,33.1514],[-83.2741,33.1872],[-83.2535,33.2593],[-83.1458,33.3121],[-83.1642,33.355],[-83.0129,33.4692],[-82.852,33.4435],[-82.7558,33.2534],[-82.7472,33.2477],[-82.7483,33.2383],[-82.855,33.1964],[-82.8889,33.1386],[-83.0522,33.0807]]]},"id":"13141"},{"type":"Feature","properties":{"NAME":"Hart","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-82.9922,34.4792],[-82.9796,34.4827],[-82.9391,34.4862],[-82.9027,34.4859],[-82.8829,34.479],[-82.8738,34.4715],[-82.8749,34.4689],[-82.8487,34.4238],[-82.7661,34.2935],[-82.9809,34.2115],[-83.078,34.2236],[-83.1156,34.2621],[-83.1134,34.2735],[-83.0942,34.4159],[-83.0522,34.4931],[-83.0347,34.4835],[-83.0068,34.4744],[-82.9953,34.4745],[-82.9927,34.4791],[-82.9922,34.4792]]]},"id":"13147"},{"type":"Feature","properties":{"NAME":"Irwin","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.5007,31.594],[-83.4536,31.7579],[-83.3253,31.7566],[-83.3256,31.6806],[-83.1772,31.6517],[-83.1764,31.6784],[-82.9984,31.6732],[-83.1456,31.4723],[-83.1461,31.4721],[-83.3387,31.476],[-83.5007,31.594]]]},"id":"13155"},{"type":"Feature","properties":{"NAME":"Jasper","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.816,33.1318],[-83.8173,33.1415],[-83.8141,33.1485],[-83.8229,33.1579],[-83.8246,33.1756],[-83.8223,33.1802],[-83.8141,33.2421],[-83.8631,33.3683],[-83.8249,33.4373],[-83.6746,33.4872],[-83.6822,33.5262],[-83.5868,33.4656],[-83.5337,33.4345],[-83.5378,33.3938],[-83.5459,33.1719],[-83.816,33.1318]]]},"id":"13159"},{"type":"Feature","properties":{"NAME":"Jenkins","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-81.7676,32.9094],[-81.8679,32.6812],[-81.841,32.6491],[-82.0012,32.6069],[-82.0824,32.6631],[-82.145,32.8127],[-82.0813,32.9168],[-81.858,32.9539],[-81.7676,32.9094]]]},"id":"13165"},{"type":"Feature","properties":{"NAME":"Lamar","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-84.2701,32.991],[-84.2482,33.189],[-84.1238,33.2028],[-84.0415,33.2026],[-84.0441,32.9479],[-84.1233,32.9322],[-84.1224,32.9896],[-84.2701,32.991]]]},"id":"13171"},{"type":"Feature","properties":{"NAME":"Lanier","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.0194,30.8495],[-83.0429,30.9473],[-83.1795,30.9501],[-83.198,31.0254],[-83.1651,31.1472],[-83.0382,31.1467],[-83.0469,31.1837],[-82.9712,31.184],[-82.9713,30.8694],[-82.9822,30.8722],[-82.9939,30.8608],[-83.0066,30.8595],[-83.014,30.8447],[-83.0194,30.8495]]]},"id":"13173"},{"type":"Feature","properties":{"NAME":"Lincoln","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.4253,33.6506],[-82.4309,33.6551],[-82.436,33.652],[-82.4517,33.6496],[-82.4582,33.6375],[-82.4699,33.6386],[-82.477,33.6443],[-82.4795,33.6395],[-82.5935,33.8273],[-82.6455,33.9842],[-82.5645,33.9557],[-82.4292,33.8658],[-82.4228,33.8638],[-82.4084,33.8663],[-82.4039,33.8655],[-82.3245,33.82],[-82.3015,33.8019],[-82.2475,33.7526],[-82.2186,33.6863],[-82.3064,33.7006],[-82.4253,33.6506]]]},"id":"13181"},{"type":"Feature","properties":{"NAME":"Morgan","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.2799,33.4834],[-83.5337,33.4345],[-83.5868,33.4656],[-83.6822,33.5262],[-83.6777,33.5712],[-83.6814,33.5779],[-83.6871,33.5824],[-83.6874,33.5886],[-83.6809,33.5969],[-83.5059,33.8178],[-83.4062,33.6983],[-83.2692,33.5332],[-83.2799,33.4834]]]},"id":"13211"},{"type":"Feature","properties":{"NAME":"Muscogee","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-85.0011,32.5105],[-85.0013,32.513],[-85.0071,32.5239],[-85.0225,32.5429],[-85.0446,32.5595],[-85.0696,32.5839],[-85.0799,32.6029],[-85.0803,32.6036],[-85.0825,32.607],[-84.9077,32.6076],[-84.9079,32.5834],[-84.6946,32.5839],[-84.6945,32.5187],[-84.7694,32.4223],[-84.7746,32.4218],[-84.7784,32.4231],[-84.7816,32.4229],[-84.783,32.4217],[-84.7885,32.418],[-84.7915,32.4148],[-84.7986,32.416],[-84.8052,32.4189],[-84.8094,32.4209],[-84.8114,32.4186],[-84.8146,32.4144],[-84.824,32.414],[-84.8344,32.4132],[-84.8442,32.4132],[-84.8487,32.4146],[-84.9873,32.3816],[-84.9794,32.4122],[-84.9838,32.4456],[-84.9982,32.4698],[-85.0008,32.5065],[-85.001,32.5102],[-85.0011,32.5105]]]},"id":"13215"},{"type":"Feature","properties":{"NAME":"Quitman","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-85.0622,31.9919],[-84.907,31.9245],[-84.9103,31.7768],[-84.9586,31.7779],[-85.1387,31.7804],[-85.1413,31.7832],[-85.1418,31.8399],[-85.1329,31.8883],[-85.1066,31.9152],[-85.0821,31.9447],[-85.0723,31.9648],[-85.0622,31.9919]]]},"id":"13239"},{"type":"Feature","properties":{"NAME":"McIntosh","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.6632,31.5387],[-81.566,31.5765],[-81.4918,31.6996],[-81.4358,31.6421],[-81.2619,31.6501],[-81.1944,31.5681],[-81.2043,31.5682],[-81.2145,31.5576],[-81.2407,31.5523],[-81.2542,31.5559],[-81.2601,31.5483],[-81.2639,31.5326],[-81.2634,31.5309],[-81.2588,31.5291],[-81.2179,31.5273],[-81.2135,31.5282],[-81.1995,31.5376],[-81.193,31.5358],[-81.1816,31.5277],[-81.1783,31.5224],[-81.1773,31.5171],[-81.1896,31.5036],[-81.2049,31.4731],[-81.2469,31.4228],[-81.2586,31.4044],[-81.2788,31.3672],[-81.2793,31.3511],[-81.2829,31.3265],[-81.2745,31.3262],[-81.268,31.3242],[-81.2548,31.3155],[-81.261,31.3039],[-81.2699,31.2945],[-81.4359,31.3133],[-81.6243,31.453],[-81.6632,31.5387]]]},"id":"13191"},{"type":"Feature","properties":{"NAME":"Paulding","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.0503,33.9045],[-84.9787,33.9514],[-84.9227,34.0825],[-84.7378,34.0794],[-84.7244,33.8819],[-84.725,33.8199],[-84.7252,33.817],[-84.724,33.8153],[-84.7241,33.8062],[-84.7241,33.7914],[-84.7255,33.7886],[-84.7413,33.7886],[-84.7699,33.7847],[-84.792,33.7812],[-84.7951,33.7798],[-84.7999,33.7799],[-84.8327,33.7785],[-84.8327,33.776],[-84.8792,33.7748],[-84.9017,33.7807],[-84.9186,33.7863],[-85.0379,33.8119],[-85.0367,33.9043],[-85.0503,33.9045]]]},"id":"13223"},{"type":"Feature","properties":{"NAME":"Lowndes","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.4756,31.032],[-83.2951,31.0273],[-83.2805,31.0266],[-83.2737,31.0267],[-83.198,31.0254],[-83.1795,30.9501],[-83.0429,30.9473],[-83.0194,30.8495],[-83.0881,30.8487],[-83.1362,30.7752],[-83.1366,30.6243],[-83.1562,30.6255],[-83.1633,30.6259],[-83.1744,30.6264],[-83.1874,30.6272],[-83.2562,30.6313],[-83.3092,30.6344],[-83.3093,30.6344],[-83.3095,30.6344],[-83.3116,30.6346],[-83.3409,30.6363],[-83.341,30.6363],[-83.3577,30.6374],[-83.4825,30.7569],[-83.4493,30.818],[-83.359,30.8367],[-83.4581,31.0009],[-83.4604,31.0028],[-83.4613,31.0057],[-83.4637,31.0059],[-83.4643,31.0111],[-83.4668,31.0139],[-83.4659,31.0185],[-83.4678,31.0216],[-83.4713,31.0239],[-83.4716,31.0266],[-83.4683,31.0285],[-83.4708,31.0285],[-83.4723,31.0297],[-83.4733,31.0285],[-83.4738,31.0313],[-83.4769,31.031],[-83.4756,31.032]]]},"id":"13185"},{"type":"Feature","properties":{"NAME":"McDuffie","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.4253,33.6506],[-82.4368,33.5497],[-82.2942,33.3546],[-82.3503,33.3148],[-82.3535,33.3123],[-82.3576,33.3127],[-82.372,33.3109],[-82.3838,33.3121],[-82.5494,33.3577],[-82.6497,33.6088],[-82.4795,33.6395],[-82.477,33.6443],[-82.4699,33.6386],[-82.4582,33.6375],[-82.4517,33.6496],[-82.436,33.652],[-82.4309,33.6551],[-82.4253,33.6506]]]},"id":"13189"},{"type":"Feature","properties":{"NAME":"Madison","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.2584,33.9991],[-83.36,34.0406],[-83.4024,34.1975],[-83.4001,34.2005],[-83.3724,34.2059],[-83.3553,34.2237],[-83.2973,34.2646],[-83.1727,34.2385],[-83.1134,34.2735],[-83.1156,34.2621],[-83.078,34.2236],[-83.1021,34.1738],[-82.9763,34.0432],[-83.0493,34.0161],[-83.1239,34.0476],[-83.2584,33.9991]]]},"id":"13195"},{"type":"Feature","properties":{"NAME":"Meriwether","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-84.8624,33.1912],[-84.8524,33.2236],[-84.5024,33.2211],[-84.4929,33.2],[-84.4968,33.1839],[-84.527,32.9705],[-84.5069,32.8818],[-84.5707,32.8452],[-84.7005,32.8446],[-84.8618,32.8725],[-84.8624,33.1912]]]},"id":"13199"},{"type":"Feature","properties":{"NAME":"Mitchell","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.3766,31.0789],[-84.5081,31.0784],[-84.4833,31.1555],[-84.4043,31.1991],[-84.3406,31.3053],[-84.2007,31.3555],[-84.1411,31.4402],[-83.9978,31.4438],[-83.9994,31.335],[-84.0036,31.0773],[-84.0045,31.0772],[-84.1166,31.078],[-84.3766,31.0789]]]},"id":"13205"},{"type":"Feature","properties":{"NAME":"Montgomery","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.4091,32.3537],[-82.4831,31.969],[-82.5437,31.9589],[-82.5981,32.0144],[-82.6129,32.1615],[-82.6555,32.2976],[-82.4091,32.3537]]]},"id":"13209"},{"type":"Feature","properties":{"NAME":"Murray","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.7759,34.9878],[-84.731,34.9881],[-84.7274,34.988],[-84.6215,34.9883],[-84.6186,34.8554],[-84.5823,34.8251],[-84.6571,34.7289],[-84.6545,34.5832],[-84.7165,34.6229],[-84.8638,34.6086],[-84.9135,34.6341],[-84.9337,34.7068],[-84.8649,34.7074],[-84.8785,34.7796],[-84.8187,34.877],[-84.8105,34.9876],[-84.8092,34.9876],[-84.8081,34.9876],[-84.7759,34.9878]]]},"id":"13213"},{"type":"Feature","properties":{"NAME":"Oglethorpe","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.7795,33.9711],[-82.8746,33.9218],[-82.9873,33.7807],[-82.949,33.7333],[-82.9889,33.7063],[-82.9956,33.6936],[-83.1187,33.6988],[-83.2803,33.7618],[-83.2759,33.848],[-83.2409,33.9044],[-83.2584,33.9991],[-83.1239,34.0476],[-83.0493,34.0161],[-82.9763,34.0432],[-82.7795,33.9711]]]},"id":"13221"},{"type":"Feature","properties":{"NAME":"Pierce","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.4172,31.4171],[-82.3448,31.4301],[-82.2266,31.5307],[-82.1328,31.4713],[-82.0528,31.4546],[-82.0411,31.3737],[-82.0068,31.2771],[-82.1001,31.2767],[-82.1948,31.2076],[-82.2846,31.2244],[-82.3837,31.2911],[-82.4172,31.4171]]]},"id":"13229"},{"type":"Feature","properties":{"NAME":"Pike","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-84.2482,33.189],[-84.2701,32.991],[-84.4897,32.9937],[-84.527,32.9705],[-84.4968,33.1839],[-84.4513,33.2089],[-84.2482,33.189]]]},"id":"13231"},{"type":"Feature","properties":{"NAME":"Pulaski","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.498,32.4017],[-83.3465,32.2725],[-83.2911,32.1788],[-83.3373,32.1059],[-83.6085,32.1184],[-83.6156,32.2886],[-83.498,32.4017]]]},"id":"13235"},{"type":"Feature","properties":{"NAME":"Rabun","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-83.1085,35.0008],[-83.1433,34.9248],[-83.243,34.8777],[-83.2673,34.8327],[-83.2832,34.8213],[-83.3241,34.7887],[-83.3391,34.7413],[-83.3524,34.7161],[-83.549,34.7495],[-83.5869,34.82],[-83.6522,34.823],[-83.6568,34.8785],[-83.5494,34.9925],[-83.4831,34.9937],[-83.1087,35.0008],[-83.1085,35.0008]]]},"id":"13241"},{"type":"Feature","properties":{"NAME":"Rockdale","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.0237,33.7528],[-83.9846,33.7843],[-83.982,33.7861],[-83.9545,33.7689],[-83.9533,33.768],[-83.9148,33.7442],[-83.9727,33.6055],[-84.0243,33.5482],[-84.0249,33.5475],[-84.0445,33.5258],[-84.1363,33.5723],[-84.1721,33.6219],[-84.1816,33.6292],[-84.1841,33.6462],[-84.1043,33.636],[-84.0566,33.7266],[-84.0237,33.7528]]]},"id":"13247"},{"type":"Feature","properties":{"NAME":"Spalding","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-84.5024,33.2211],[-84.5003,33.2334],[-84.5089,33.2452],[-84.4975,33.2574],[-84.4329,33.2565],[-84.3881,33.3525],[-84.3544,33.3525],[-84.1506,33.3356],[-84.1026,33.2982],[-84.1238,33.2028],[-84.2482,33.189],[-84.4513,33.2089],[-84.4968,33.1839],[-84.4929,33.2],[-84.5024,33.2211]]]},"id":"13255"},{"type":"Feature","properties":{"NAME":"Stephens","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-83.3379,34.6877],[-83.2917,34.6534],[-83.2407,34.6245],[-83.2407,34.6243],[-83.1675,34.6004],[-83.171,34.5988],[-83.1703,34.5924],[-83.1069,34.5341],[-83.1778,34.477],[-83.3984,34.4609],[-83.4136,34.468],[-83.4598,34.4811],[-83.3379,34.6877]]]},"id":"13257"},{"type":"Feature","properties":{"NAME":"Tattnall","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-81.7617,32.0479],[-81.8099,32.0197],[-81.8244,32.0149],[-81.9691,31.7893],[-81.9819,31.7844],[-82.0068,31.8],[-82.0146,31.8218],[-82.0283,31.8155],[-82.0486,31.8271],[-82.1428,31.8993],[-82.225,31.9131],[-82.182,32.1656],[-82.2328,32.3188],[-82.0253,32.2789],[-81.98,32.0815],[-81.7617,32.0479]]]},"id":"13267"},{"type":"Feature","properties":{"NAME":"Taylor","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.2546,32.3721],[-84.3923,32.414],[-84.4444,32.5621],[-84.4089,32.5619],[-84.3379,32.7206],[-84.2862,32.7476],[-84.2026,32.69],[-84.105,32.6734],[-84.0034,32.5299],[-84.0011,32.5206],[-84.0085,32.5218],[-84.1223,32.5059],[-84.2546,32.3721]]]},"id":"13269"},{"type":"Feature","properties":{"NAME":"Thomas","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.0838,30.676],[-84.077,30.9156],[-84.1191,30.981],[-84.1166,31.078],[-84.0045,31.0772],[-84.0036,31.0773],[-84.0039,31.0416],[-83.7362,31.0377],[-83.7437,30.6584],[-83.8105,30.6619],[-83.8209,30.6626],[-83.8552,30.6644],[-83.8802,30.6658],[-83.8803,30.6658],[-84.0074,30.6721],[-84.0075,30.6721],[-84.0397,30.6738],[-84.0418,30.6739],[-84.0466,30.6742],[-84.0572,30.6747],[-84.0838,30.676]]]},"id":"13275"},{"type":"Feature","properties":{"NAME":"Toombs","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.4315,31.9662],[-82.4394,31.9678],[-82.4445,31.9675],[-82.4521,31.9646],[-82.4582,31.9639],[-82.4796,31.9717],[-82.4831,31.969],[-82.4091,32.3537],[-82.4091,32.3538],[-82.4091,32.3538],[-82.4091,32.3538],[-82.3545,32.2922],[-82.2328,32.3188],[-82.182,32.1656],[-82.225,31.9131],[-82.4315,31.9662]]]},"id":"13279"},{"type":"Feature","properties":{"NAME":"Towns","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-83.7804,34.7929],[-83.8191,34.9137],[-83.9151,34.9269],[-83.9364,34.9875],[-83.6736,34.9871],[-83.6202,34.9921],[-83.5494,34.9925],[-83.6568,34.8785],[-83.6522,34.823],[-83.6579,34.8137],[-83.6669,34.8065],[-83.6816,34.8006],[-83.6857,34.801],[-83.6932,34.7973],[-83.696,34.7935],[-83.7018,34.7925],[-83.7041,34.791],[-83.7078,34.7917],[-83.7118,34.7905],[-83.7142,34.7931],[-83.721,34.7961],[-83.722,34.7973],[-83.7269,34.7977],[-83.736,34.8001],[-83.7431,34.8012],[-83.7804,34.7929]]]},"id":"13281"},{"type":"Feature","properties":{"NAME":"Twiggs","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.407,32.8982],[-83.2265,32.5842],[-83.4979,32.4522],[-83.5662,32.6608],[-83.5977,32.6643],[-83.5026,32.8011],[-83.5135,32.8449],[-83.4077,32.8978],[-83.407,32.8982]]]},"id":"13289"},{"type":"Feature","properties":{"NAME":"Walker","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.0692,34.5872],[-85.1077,34.5875],[-85.5271,34.5887],[-85.5344,34.6238],[-85.4504,34.7592],[-85.4506,34.8317],[-85.3639,34.9834],[-85.3083,34.9844],[-85.3055,34.9845],[-85.3015,34.9845],[-85.2945,34.9847],[-85.2776,34.985],[-85.2759,34.985],[-85.2651,34.9851],[-85.2648,34.8543],[-85.2022,34.8545],[-85.2019,34.7751],[-85.1448,34.7676],[-85.1689,34.7203],[-85.0508,34.72],[-85.0504,34.6225],[-85.0551,34.6224],[-85.0552,34.6224],[-85.0604,34.6225],[-85.0605,34.5872],[-85.0692,34.5872]]]},"id":"13295"},{"type":"Feature","properties":{"NAME":"Warren","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.3838,33.3121],[-82.432,33.2748],[-82.5598,33.3273],[-82.7558,33.2534],[-82.852,33.4435],[-82.8153,33.5211],[-82.7513,33.5101],[-82.68,33.5998],[-82.6703,33.6041],[-82.6591,33.603],[-82.6566,33.5968],[-82.6522,33.5967],[-82.6559,33.6066],[-82.6524,33.6112],[-82.6497,33.6088],[-82.5494,33.3577],[-82.3838,33.3121]]]},"id":"13301"},{"type":"Feature","properties":{"NAME":"Banks","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-83.3553,34.2237],[-83.3724,34.2059],[-83.4001,34.2005],[-83.4024,34.1975],[-83.4804,34.262],[-83.6201,34.2953],[-83.6695,34.3667],[-83.6153,34.4317],[-83.5375,34.4917],[-83.4598,34.4811],[-83.4136,34.468],[-83.3984,34.4609],[-83.3939,34.3248],[-83.3553,34.2237]]]},"id":"13011"},{"type":"Feature","properties":{"NAME":"Berrien","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.198,31.0254],[-83.2737,31.0267],[-83.2805,31.0266],[-83.2951,31.0273],[-83.3056,31.1672],[-83.4345,31.3504],[-83.3387,31.476],[-83.1461,31.4721],[-83.1456,31.4723],[-83.1459,31.4689],[-83.1508,31.4623],[-83.1505,31.4568],[-83.1449,31.4546],[-83.1386,31.4415],[-83.1394,31.4365],[-83.1359,31.4305],[-83.139,31.4278],[-83.1405,31.4204],[-83.0335,31.2747],[-83.0469,31.1837],[-83.0382,31.1467],[-83.1651,31.1472],[-83.198,31.0254]]]},"id":"13019"},{"type":"Feature","properties":{"NAME":"Brooks","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.5749,31.0781],[-83.4756,31.032],[-83.4769,31.031],[-83.4738,31.0313],[-83.4733,31.0285],[-83.4723,31.0297],[-83.4708,31.0285],[-83.4683,31.0285],[-83.4716,31.0266],[-83.4713,31.0239],[-83.4678,31.0216],[-83.4659,31.0185],[-83.4668,31.0139],[-83.4643,31.0111],[-83.4637,31.0059],[-83.4613,31.0057],[-83.4604,31.0028],[-83.4581,31.0009],[-83.359,30.8367],[-83.4493,30.818],[-83.4825,30.7569],[-83.3577,30.6374],[-83.3795,30.6387],[-83.3901,30.6393],[-83.4295,30.6415],[-83.4296,30.6415],[-83.44,30.642],[-83.4489,30.6424],[-83.6117,30.6513],[-83.6117,30.6513],[-83.6741,30.6547],[-83.6768,30.6549],[-83.7437,30.6584],[-83.7362,31.0377],[-83.574,31.0339],[-83.5749,31.0781]]]},"id":"13027"},{"type":"Feature","properties":{"NAME":"Burke","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-81.852,33.2474],[-81.7723,33.1801],[-81.6969,33.1166],[-81.6203,33.0954],[-81.6158,33.0925],[-81.5418,33.0457],[-81.7676,32.9094],[-81.858,32.9539],[-82.0813,32.9168],[-82.145,32.8127],[-82.3165,32.8358],[-82.2724,32.9378],[-82.2912,33.0628],[-82.2326,33.2312],[-82.2676,33.2674],[-82.1742,33.2968],[-82.0882,33.2302],[-81.852,33.2474]]]},"id":"13033"},{"type":"Feature","properties":{"NAME":"Camden","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.906,30.8222],[-81.892,30.9605],[-81.936,31.048],[-81.7663,31.1696],[-81.5727,31.0973],[-81.4432,31.0167],[-81.4514,31.0155],[-81.4578,31.0103],[-81.4592,31.0057],[-81.4693,30.996],[-81.4906,30.985],[-81.4937,30.9775],[-81.487,30.9696],[-81.4758,30.966],[-81.4723,30.9699],[-81.4668,30.9709],[-81.4536,30.9656],[-81.4474,30.9567],[-81.4269,30.9566],[-81.4201,30.9741],[-81.4158,30.9772],[-81.4085,30.9777],[-81.4034,30.9579],[-81.4052,30.9082],[-81.4286,30.8363],[-81.4308,30.8312],[-81.4401,30.8214],[-81.4469,30.8104],[-81.4553,30.7909],[-81.4601,30.7699],[-81.4611,30.7537],[-81.4595,30.742],[-81.4494,30.7156],[-81.4441,30.7097],[-81.5446,30.7126],[-81.6062,30.7181],[-81.6243,30.7362],[-81.6372,30.7338],[-81.7199,30.7446],[-81.7326,30.7499],[-81.7413,30.7627],[-81.7593,30.7714],[-81.8067,30.7897],[-81.827,30.7889],[-81.8404,30.7864],[-81.8686,30.7928],[-81.906,30.8222]]]},"id":"13039"},{"type":"Feature","properties":{"NAME":"Chatham","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.0041,32.0722],[-80.8855,32.0346],[-80.8591,32.0237],[-80.8523,32.0267],[-80.8431,32.0242],[-80.8405,32.0113],[-80.8419,32.0026],[-80.8484,31.9883],[-80.8628,31.9693],[-80.8828,31.9591],[-80.8977,31.9491],[-80.9112,31.9438],[-80.9291,31.945],[-80.9303,31.9567],[-80.9485,31.9572],[-80.9724,31.9413],[-80.9757,31.9236],[-80.9685,31.9158],[-80.9545,31.9118],[-80.9414,31.913],[-80.9345,31.9092],[-80.9473,31.8962],[-80.9714,31.8779],[-80.9927,31.8576],[-81.0003,31.8567],[-81.0145,31.8675],[-81.0415,31.8762],[-81.0653,31.8771],[-81.0586,31.8578],[-81.0591,31.8501],[-81.0628,31.8447],[-81.0762,31.8361],[-81.0758,31.829],[-81.0572,31.8227],[-81.0509,31.8224],[-81.0479,31.8249],[-81.0398,31.823],[-81.037,31.8196],[-81.0369,31.8127],[-81.0473,31.8029],[-81.0681,31.7687],[-81.0771,31.7613],[-81.0974,31.7531],[-81.1306,31.7227],[-81.1384,31.7209],[-81.1547,31.7262],[-81.177,31.8161],[-81.1385,31.8559],[-81.2855,31.943],[-81.3235,32.0199],[-81.3917,32.0959],[-81.1956,32.2375],[-81.1255,32.2271],[-81.122,32.1618],[-81.1172,32.1176],[-81.1133,32.1132],[-81.0619,32.0879],[-81.0428,32.0845],[-81.0041,32.0722]]]},"id":"13051"},{"type":"Feature","properties":{"NAME":"Clay","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.8178,31.6198],[-84.8198,31.5012],[-85.0292,31.4861],[-85.0469,31.5175],[-85.0413,31.541],[-85.0575,31.6186],[-85.0595,31.6217],[-85.0652,31.6244],[-85.087,31.641],[-85.1255,31.695],[-85.1265,31.7168],[-85.1222,31.7228],[-85.1189,31.7327],[-85.1245,31.7631],[-85.1252,31.7671],[-85.1307,31.7723],[-85.1387,31.7804],[-84.9586,31.7779],[-84.9424,31.6187],[-84.8178,31.6198]]]},"id":"13061"},{"type":"Feature","properties":{"NAME":"Baker","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.6376,31.4339],[-84.4299,31.4367],[-84.1411,31.4402],[-84.2007,31.3555],[-84.3406,31.3053],[-84.4043,31.1991],[-84.4833,31.1555],[-84.5081,31.0784],[-84.5427,31.079],[-84.5371,31.2559],[-84.6417,31.259],[-84.6376,31.4339]]]},"id":"13007"},{"type":"Feature","properties":{"NAME":"Bibb","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.7107,32.9528],[-83.6582,32.8879],[-83.5135,32.8449],[-83.5026,32.8011],[-83.5977,32.6643],[-83.7012,32.6922],[-83.8244,32.7419],[-83.8919,32.8484],[-83.7107,32.9528]]]},"id":"13021"},{"type":"Feature","properties":{"NAME":"Butts","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-83.8631,33.3683],[-83.8141,33.2421],[-83.8223,33.1802],[-84.0415,33.2026],[-84.1238,33.2028],[-84.1026,33.2982],[-84.0427,33.3335],[-84.0446,33.3335],[-84.0446,33.3337],[-83.9239,33.4442],[-83.8631,33.3683]]]},"id":"13035"},{"type":"Feature","properties":{"NAME":"Catoosa","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.1448,34.7676],[-85.2019,34.7751],[-85.2022,34.8545],[-85.2648,34.8543],[-85.2651,34.9851],[-85.255,34.9852],[-85.2356,34.9855],[-85.2304,34.9855],[-85.2219,34.9855],[-85.2206,34.9856],[-85.2179,34.9857],[-85.2166,34.9857],[-85.1859,34.986],[-85.1806,34.9861],[-85.0452,34.9869],[-85.0451,34.9869],[-84.9799,34.9876],[-85.0616,34.8195],[-85.1448,34.7676]]]},"id":"13047"},{"type":"Feature","properties":{"NAME":"Clinch","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.4598,30.5843],[-82.5249,30.5882],[-82.5362,30.5889],[-82.5451,30.5894],[-82.5532,30.5899],[-82.5655,30.5906],[-82.5692,30.591],[-82.584,30.5918],[-82.604,30.7137],[-82.7662,30.7324],[-82.8464,30.835],[-82.9713,30.8694],[-82.9712,31.184],[-82.6717,31.1837],[-82.5921,31.0185],[-82.4906,30.9632],[-82.4955,30.8196],[-82.4359,30.8201],[-82.4189,30.5817],[-82.4595,30.5843],[-82.4598,30.5843]]]},"id":"13065"},{"type":"Feature","properties":{"NAME":"Cook","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.2951,31.0273],[-83.4756,31.032],[-83.5749,31.0781],[-83.5098,31.2062],[-83.5126,31.3274],[-83.4606,31.3263],[-83.4345,31.3504],[-83.3056,31.1672],[-83.2951,31.0273]]]},"id":"13075"},{"type":"Feature","properties":{"NAME":"Dawson","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-84.2581,34.3352],[-84.2578,34.3726],[-84.2577,34.3751],[-84.2576,34.381],[-84.2569,34.4673],[-84.3197,34.4679],[-84.3456,34.5627],[-84.2551,34.5683],[-84.1968,34.6179],[-84.189,34.6081],[-84.1886,34.6027],[-84.191,34.5392],[-84.102,34.4645],[-83.9806,34.4184],[-83.9571,34.334],[-84.2581,34.3352]]]},"id":"13085"},{"type":"Feature","properties":{"NAME":"Early","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.0469,31.5175],[-85.0292,31.4861],[-84.8198,31.5012],[-84.789,31.4364],[-84.6376,31.4339],[-84.6417,31.259],[-84.9174,31.256],[-84.9224,31.0726],[-84.9999,31.0747],[-85.0019,31.075],[-85.0221,31.0755],[-85.0297,31.0962],[-85.0356,31.1082],[-85.0766,31.1569],[-85.0836,31.1596],[-85.0921,31.1603],[-85.1002,31.1655],[-85.1075,31.1865],[-85.1119,31.2584],[-85.1016,31.2834],[-85.0877,31.3087],[-85.0681,31.4276],[-85.0469,31.5175]]]},"id":"13099"},{"type":"Feature","properties":{"NAME":"Forsyth","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.2581,34.3352],[-83.9571,34.334],[-83.9273,34.2794],[-83.9891,34.1957],[-84.0628,34.1679],[-84.0746,34.1637],[-84.0948,34.1317],[-84.1013,34.1063],[-84.1026,34.1038],[-84.1054,34.1022],[-84.1071,34.1],[-84.1099,34.0984],[-84.1178,34.0653],[-84.0977,34.0507],[-84.2004,34.0901],[-84.2589,34.1095],[-84.2587,34.1859],[-84.2581,34.3352]]]},"id":"13117"},{"type":"Feature","properties":{"NAME":"Webster","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.6558,31.9203],[-84.6493,32.233],[-84.5271,32.1346],[-84.4312,32.1341],[-84.4438,31.9675],[-84.4533,31.9192],[-84.5998,31.9202],[-84.6558,31.9203]]]},"id":"13307"},{"type":"Feature","properties":{"NAME":"White","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-83.8565,34.7222],[-83.7804,34.7929],[-83.7431,34.8012],[-83.736,34.8001],[-83.7269,34.7977],[-83.722,34.7973],[-83.721,34.7961],[-83.7142,34.7931],[-83.7118,34.7905],[-83.7078,34.7917],[-83.7041,34.791],[-83.7018,34.7925],[-83.696,34.7935],[-83.6932,34.7973],[-83.6857,34.801],[-83.6816,34.8006],[-83.6233,34.7322],[-83.6628,34.6598],[-83.6155,34.5529],[-83.6664,34.5036],[-83.8434,34.5055],[-83.8773,34.6296],[-83.8565,34.7222]]]},"id":"13311"},{"type":"Feature","properties":{"NAME":"Wilcox","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-83.1775,31.8479],[-83.4802,31.8473],[-83.6123,31.8541],[-83.6097,32.0279],[-83.6084,32.1165],[-83.6085,32.1184],[-83.3373,32.1059],[-83.2921,31.9845],[-83.2057,31.9003],[-83.1775,31.8479]]]},"id":"13315"},{"type":"Feature","properties":{"NAME":"Dade","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.6052,34.9847],[-85.4745,34.984],[-85.3639,34.9834],[-85.4506,34.8317],[-85.4504,34.7592],[-85.5344,34.6238],[-85.5413,34.6567],[-85.5413,34.6568],[-85.5525,34.7081],[-85.5525,34.7083],[-85.5831,34.8604],[-85.5952,34.9242],[-85.5952,34.9243],[-85.6052,34.9847]]]},"id":"13083"},{"type":"Feature","properties":{"NAME":"DeKalb","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.2541,33.647],[-84.2813,33.6474],[-84.2826,33.647],[-84.3502,33.6479],[-84.3498,33.664],[-84.3483,33.8525],[-84.3481,33.8577],[-84.3482,33.8595],[-84.3485,33.8619],[-84.3481,33.8649],[-84.3483,33.8679],[-84.3481,33.8792],[-84.3484,33.8819],[-84.3482,33.8929],[-84.3482,33.9048],[-84.348,33.9183],[-84.3478,33.9189],[-84.3479,33.927],[-84.3478,33.938],[-84.2768,33.9577],[-84.2757,33.9542],[-84.2719,33.9559],[-84.2663,33.9476],[-84.2722,33.9449],[-84.2653,33.9326],[-84.259,33.9188],[-84.256,33.9144],[-84.2504,33.9108],[-84.2322,33.902],[-84.2166,33.885],[-84.2047,33.877],[-84.2035,33.873],[-84.187,33.8655],[-84.1794,33.8644],[-84.1721,33.8575],[-84.0237,33.7528],[-84.0566,33.7266],[-84.1043,33.636],[-84.1841,33.6462],[-84.224,33.6466],[-84.2242,33.6307],[-84.2455,33.6307],[-84.2541,33.647]]]},"id":"13089"},{"type":"Feature","properties":{"NAME":"Douglas","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.7699,33.7847],[-84.7413,33.7886],[-84.7255,33.7886],[-84.7241,33.7914],[-84.7241,33.8062],[-84.6199,33.805],[-84.5781,33.7435],[-84.5868,33.7291],[-84.5943,33.729],[-84.6017,33.7244],[-84.608,33.7129],[-84.6212,33.7045],[-84.6321,33.7003],[-84.6301,33.6931],[-84.7527,33.6302],[-84.7631,33.6142],[-84.7756,33.6097],[-84.8057,33.5864],[-84.8089,33.5741],[-84.9058,33.5734],[-84.9025,33.6611],[-84.9017,33.7807],[-84.8792,33.7748],[-84.8327,33.776],[-84.8327,33.7785],[-84.7999,33.7799],[-84.7951,33.7798],[-84.792,33.7812],[-84.7699,33.7847]]]},"id":"13097"},{"type":"Feature","properties":{"NAME":"Elbert","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.7415,34.2087],[-82.7319,34.1784],[-82.7175,34.1505],[-82.7041,34.141],[-82.6773,34.1317],[-82.6681,34.1202],[-82.6591,34.1035],[-82.6586,34.1031],[-82.654,34.1003],[-82.6522,34.0997],[-82.6413,34.0889],[-82.6407,34.0883],[-82.5971,34.0124],[-82.5646,33.9558],[-82.5645,33.9557],[-82.6455,33.9842],[-82.7795,33.9711],[-82.9763,34.0432],[-83.1021,34.1738],[-83.078,34.2236],[-82.9809,34.2115],[-82.7661,34.2935],[-82.755,34.2761],[-82.742,34.2302],[-82.7435,34.2273],[-82.7444,34.2249],[-82.7419,34.2101],[-82.7415,34.2087]]]},"id":"13105"},{"type":"Feature","properties":{"NAME":"Fannin","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.6215,34.9883],[-84.5099,34.988],[-84.5091,34.988],[-84.3949,34.988],[-84.3939,34.9881],[-84.3219,34.9884],[-84.1296,34.9875],[-84.1295,34.9875],[-84.1787,34.9465],[-84.1074,34.8869],[-84.0932,34.8014],[-84.158,34.6482],[-84.1886,34.6027],[-84.189,34.6081],[-84.1968,34.6179],[-84.3147,34.8073],[-84.4291,34.855],[-84.6186,34.8554],[-84.6215,34.9883]]]},"id":"13111"},{"type":"Feature","properties":{"NAME":"Fulton","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.7527,33.6302],[-84.6301,33.6931],[-84.6321,33.7003],[-84.6212,33.7045],[-84.608,33.7129],[-84.6017,33.7244],[-84.5943,33.729],[-84.5868,33.7291],[-84.5781,33.7435],[-84.4801,33.8173],[-84.4427,33.9015],[-84.383,33.9638],[-84.4189,34.0733],[-84.3283,34.1861],[-84.2587,34.1859],[-84.2589,34.1095],[-84.2004,34.0901],[-84.0977,34.0507],[-84.2768,33.9577],[-84.3478,33.938],[-84.3479,33.927],[-84.3478,33.9189],[-84.348,33.9183],[-84.3482,33.9048],[-84.3482,33.8929],[-84.3484,33.8819],[-84.3481,33.8792],[-84.3483,33.8679],[-84.3481,33.8649],[-84.3485,33.8619],[-84.3482,33.8595],[-84.3481,33.8577],[-84.3483,33.8525],[-84.3498,33.664],[-84.3502,33.6479],[-84.3602,33.6479],[-84.3653,33.6478],[-84.4577,33.6489],[-84.4585,33.6086],[-84.4586,33.5865],[-84.4584,33.5727],[-84.4586,33.5721],[-84.4589,33.5659],[-84.4589,33.5598],[-84.4586,33.5562],[-84.4587,33.5509],[-84.6095,33.5025],[-84.8507,33.5115],[-84.8089,33.5741],[-84.8057,33.5864],[-84.7756,33.6097],[-84.7631,33.6142],[-84.7527,33.6302]]]},"id":"13121"},{"type":"Feature","properties":{"NAME":"Glynn","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.4432,31.0167],[-81.5727,31.0973],[-81.7663,31.1696],[-81.7317,31.33],[-81.692,31.4005],[-81.6243,31.453],[-81.4359,31.3133],[-81.2699,31.2945],[-81.2747,31.2895],[-81.2769,31.2547],[-81.2828,31.2443],[-81.2891,31.2255],[-81.2884,31.2111],[-81.2934,31.2063],[-81.305,31.2062],[-81.3142,31.2079],[-81.339,31.1869],[-81.3549,31.1672],[-81.3608,31.1559],[-81.3593,31.1492],[-81.3682,31.1365],[-81.3868,31.1332],[-81.3997,31.1341],[-81.4021,31.1254],[-81.4037,31.1071],[-81.4012,31.0861],[-81.4013,31.0728],[-81.4151,31.0267],[-81.4205,31.0167],[-81.4247,31.0137],[-81.4325,31.013],[-81.4347,31.0146],[-81.4349,31.0178],[-81.4432,31.0167]]]},"id":"13127"},{"type":"Feature","properties":{"NAME":"Greene","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.1642,33.355],[-83.2799,33.4834],[-83.2692,33.5332],[-83.4062,33.6983],[-83.2803,33.7618],[-83.1187,33.6988],[-82.9956,33.6936],[-82.9511,33.658],[-83.014,33.5804],[-83.0129,33.4692],[-83.1642,33.355]]]},"id":"13133"},{"type":"Feature","properties":{"NAME":"Haralson","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-85.3867,33.9017],[-85.0503,33.9045],[-85.0367,33.9043],[-85.0379,33.8119],[-85.0509,33.7146],[-85.338,33.6531],[-85.3605,33.768],[-85.3618,33.774],[-85.3867,33.9017]]]},"id":"13143"},{"type":"Feature","properties":{"NAME":"Houston","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.8484,32.291],[-83.8467,32.4685],[-83.7199,32.5318],[-83.7011,32.6916],[-83.7012,32.6922],[-83.5977,32.6643],[-83.5662,32.6608],[-83.4979,32.4522],[-83.4826,32.4245],[-83.498,32.4017],[-83.6156,32.2886],[-83.8484,32.291]]]},"id":"13153"},{"type":"Feature","properties":{"NAME":"Jefferson","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.4341,32.7623],[-82.5211,32.8224],[-82.5109,32.9178],[-82.5502,33.0192],[-82.6619,33.1263],[-82.432,33.2748],[-82.3838,33.3121],[-82.372,33.3109],[-82.3576,33.3127],[-82.3535,33.3123],[-82.3115,33.2971],[-82.2969,33.2773],[-82.2865,33.2741],[-82.2785,33.2692],[-82.2676,33.2674],[-82.2326,33.2312],[-82.2912,33.0628],[-82.2724,32.9378],[-82.3165,32.8358],[-82.4341,32.7623]]]},"id":"13163"},{"type":"Feature","properties":{"NAME":"Long","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.4918,31.6996],[-81.566,31.5765],[-81.6632,31.5387],[-81.8506,31.6677],[-81.9691,31.7893],[-81.8244,32.0149],[-81.7503,31.9732],[-81.7654,31.8745],[-81.6418,31.7655],[-81.4918,31.6996]]]},"id":"13183"},{"type":"Feature","properties":{"NAME":"Macon","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.1817,32.2297],[-84.2559,32.2962],[-84.2546,32.3721],[-84.1223,32.5059],[-84.0085,32.5218],[-83.8467,32.4685],[-83.8484,32.291],[-83.9651,32.248],[-84.0279,32.1711],[-84.1817,32.2297]]]},"id":"13193"},{"type":"Feature","properties":{"NAME":"Monroe","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.8223,33.1802],[-83.8246,33.1756],[-83.8229,33.1579],[-83.8141,33.1485],[-83.8173,33.1415],[-83.816,33.1318],[-83.747,33.0634],[-83.7107,32.9528],[-83.8919,32.8484],[-84.1243,32.8496],[-84.1233,32.9322],[-84.0441,32.9479],[-84.0415,33.2026],[-83.8223,33.1802]]]},"id":"13207"},{"type":"Feature","properties":{"NAME":"Oconee","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.5059,33.8178],[-83.647,33.9062],[-83.5374,33.9659],[-83.2759,33.848],[-83.2803,33.7618],[-83.4062,33.6983],[-83.5059,33.8178]]]},"id":"13219"},{"type":"Feature","properties":{"NAME":"Pickens","region":1,"region_name":"Northwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.6544,34.5489],[-84.3456,34.5627],[-84.3197,34.4679],[-84.2569,34.4673],[-84.2576,34.381],[-84.5826,34.3815],[-84.6532,34.4126],[-84.6544,34.5489]]]},"id":"13227"},{"type":"Feature","properties":{"NAME":"Putnam","region":6,"region_name":"Middle Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.5459,33.1719],[-83.5378,33.3938],[-83.5337,33.4345],[-83.2799,33.4834],[-83.1642,33.355],[-83.1458,33.3121],[-83.2535,33.2593],[-83.2741,33.1872],[-83.4291,33.1854],[-83.5459,33.1719]]]},"id":"13237"},{"type":"Feature","properties":{"NAME":"Schley","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.2546,32.3721],[-84.2559,32.2962],[-84.1817,32.2297],[-84.1836,32.1585],[-84.4302,32.1663],[-84.3923,32.414],[-84.2546,32.3721]]]},"id":"13249"},{"type":"Feature","properties":{"NAME":"Stewart","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.9236,32.2315],[-84.6589,32.2329],[-84.6493,32.233],[-84.6558,31.9203],[-84.907,31.9245],[-85.0622,31.9919],[-85.0502,32.0242],[-85.056,32.0631],[-85.0479,32.142],[-84.9959,32.1849],[-84.9648,32.195],[-84.9236,32.2315]]]},"id":"13259"},{"type":"Feature","properties":{"NAME":"Telfair","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.9957,31.781],[-83.1775,31.8479],[-83.2057,31.9003],[-82.9421,32.1241],[-82.9555,32.1353],[-82.9346,32.1533],[-82.9279,32.1353],[-82.8877,32.0799],[-82.7291,32.0069],[-82.6457,31.9189],[-82.8364,31.8162],[-82.8631,31.783],[-82.9957,31.781]]]},"id":"13271"},{"type":"Feature","properties":{"NAME":"Treutlen","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.4091,32.3538],[-82.4091,32.3538],[-82.4091,32.3538],[-82.4091,32.3537],[-82.6555,32.2976],[-82.722,32.3093],[-82.7371,32.338],[-82.6477,32.5125],[-82.4889,32.4918],[-82.3819,32.4406],[-82.4091,32.3538]]]},"id":"13283"},{"type":"Feature","properties":{"NAME":"Walton","region":5,"region_name":"Northeast Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.9148,33.7442],[-83.9533,33.768],[-83.9545,33.7689],[-83.982,33.7861],[-83.7991,33.9298],[-83.7638,33.8967],[-83.647,33.9062],[-83.5059,33.8178],[-83.6809,33.5969],[-83.7773,33.6583],[-83.9148,33.7442]]]},"id":"13297"},{"type":"Feature","properties":{"NAME":"Gwinnett","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.1099,34.0984],[-84.1071,34.1],[-84.1054,34.1022],[-84.1026,34.1038],[-84.1013,34.1063],[-84.0948,34.1317],[-84.0746,34.1637],[-84.0628,34.1679],[-83.868,34.0983],[-83.8177,34.1275],[-83.8691,34.0043],[-83.7991,33.9298],[-83.982,33.7861],[-83.9846,33.7843],[-84.0237,33.7528],[-84.1721,33.8575],[-84.1794,33.8644],[-84.187,33.8655],[-84.2035,33.873],[-84.2047,33.877],[-84.2166,33.885],[-84.2322,33.902],[-84.2504,33.9108],[-84.256,33.9144],[-84.259,33.9188],[-84.2653,33.9326],[-84.2722,33.9449],[-84.2663,33.9476],[-84.2719,33.9559],[-84.2757,33.9542],[-84.2768,33.9577],[-84.0977,34.0507],[-84.1178,34.0653],[-84.1099,34.0984]]]},"id":"13135"},{"type":"Feature","properties":{"NAME":"Harris","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-85.132,32.7642],[-85.1234,32.7722],[-85.1841,32.8705],[-84.8618,32.8725],[-84.7005,32.8446],[-84.6946,32.5839],[-84.9079,32.5834],[-84.9077,32.6076],[-85.0825,32.607],[-85.1048,32.6425],[-85.1147,32.6856],[-85.1371,32.7452],[-85.1368,32.7465],[-85.132,32.7642]]]},"id":"13145"},{"type":"Feature","properties":{"NAME":"Henry","region":3,"region_name":"Atlanta Regional Commission"},"geometry":{"type":"Polygon","coordinates":[[[-84.2835,33.5025],[-84.2813,33.6474],[-84.2541,33.647],[-84.2455,33.6307],[-84.2242,33.6307],[-84.224,33.6466],[-84.1841,33.6462],[-84.1816,33.6292],[-84.1721,33.6219],[-84.1363,33.5723],[-84.0445,33.5258],[-83.9239,33.4442],[-84.0446,33.3337],[-84.0446,33.3335],[-84.0427,33.3335],[-84.1026,33.2982],[-84.1506,33.3356],[-84.3544,33.3525],[-84.3536,33.4362],[-84.2835,33.5025]]]},"id":"13151"},{"type":"Feature","properties":{"NAME":"Jeff Davis","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.5214,31.7108],[-82.5214,31.6725],[-82.6273,31.6727],[-82.8366,31.6714],[-82.8364,31.8162],[-82.6457,31.9189],[-82.5437,31.9589],[-82.4831,31.969],[-82.4796,31.9717],[-82.4582,31.9639],[-82.4521,31.9646],[-82.4445,31.9675],[-82.4394,31.9678],[-82.4315,31.9662],[-82.4314,31.838],[-82.5203,31.8384],[-82.5214,31.7108]]]},"id":"13161"},{"type":"Feature","properties":{"NAME":"Johnson","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-82.947,32.7594],[-82.8025,32.8098],[-82.7684,32.7691],[-82.5211,32.8224],[-82.4341,32.7623],[-82.4994,32.6863],[-82.4651,32.6468],[-82.5944,32.5792],[-82.6477,32.5125],[-82.6686,32.6122],[-82.8628,32.7158],[-82.9571,32.7083],[-82.9464,32.7413],[-82.947,32.7594]]]},"id":"13167"},{"type":"Feature","properties":{"NAME":"Lee","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.9225,31.9097],[-83.9251,31.9057],[-83.9274,31.9041],[-83.932,31.8988],[-83.9323,31.8938],[-83.9287,31.8869],[-83.9321,31.8846],[-83.9341,31.8814],[-83.9312,31.877],[-83.9287,31.8718],[-83.9265,31.8633],[-83.9323,31.8592],[-83.9367,31.858],[-83.9378,31.8548],[-83.9382,31.8495],[-83.9394,31.8479],[-84.0323,31.7168],[-84.0184,31.6503],[-84.0432,31.6236],[-84.2978,31.622],[-84.2865,31.7912],[-84.3382,31.8736],[-84.3381,31.9162],[-83.9225,31.9097]]]},"id":"13177"},{"type":"Feature","properties":{"NAME":"Liberty","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.1944,31.5681],[-81.2619,31.6501],[-81.4358,31.6421],[-81.4918,31.6996],[-81.6418,31.7655],[-81.7654,31.8745],[-81.7503,31.9732],[-81.8244,32.0149],[-81.8099,32.0197],[-81.7617,32.0479],[-81.7187,32.0894],[-81.6044,32.0109],[-81.5934,31.9714],[-81.4758,31.9743],[-81.4077,31.9443],[-81.3558,31.8149],[-81.1984,31.7261],[-81.2036,31.7194],[-81.1863,31.7015],[-81.1611,31.6914],[-81.1546,31.6939],[-81.1519,31.6984],[-81.1494,31.6993],[-81.1394,31.6999],[-81.1311,31.6958],[-81.1356,31.6835],[-81.1364,31.6748],[-81.1317,31.6545],[-81.1335,31.6233],[-81.15,31.5935],[-81.1604,31.5704],[-81.1731,31.5559],[-81.1788,31.5555],[-81.1833,31.5601],[-81.1861,31.568],[-81.1944,31.5681]]]},"id":"13179"},{"type":"Feature","properties":{"NAME":"Turner","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.4802,31.8473],[-83.4536,31.7579],[-83.5007,31.594],[-83.649,31.5965],[-83.6494,31.568],[-83.7869,31.6228],[-83.8022,31.8035],[-83.6126,31.8041],[-83.6123,31.8541],[-83.4802,31.8473]]]},"id":"13287"},{"type":"Feature","properties":{"NAME":"Union","region":2,"region_name":"Georgia Mountains"},"geometry":{"type":"Polygon","coordinates":[[[-84.0055,34.9874],[-83.9366,34.9875],[-83.9364,34.9875],[-83.9151,34.9269],[-83.8191,34.9137],[-83.7804,34.7929],[-83.8565,34.7222],[-83.939,34.7409],[-84.0365,34.6419],[-84.158,34.6482],[-84.0932,34.8014],[-84.1074,34.8869],[-84.1787,34.9465],[-84.1295,34.9875],[-84.03,34.9873],[-84.0214,34.9874],[-84.0055,34.9874]]]},"id":"13291"},{"type":"Feature","properties":{"NAME":"Ware","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-82.2846,31.2244],[-82.2087,31.1709],[-82.2083,31.0848],[-82.1317,31.0107],[-82.4156,31.0136],[-82.4204,30.7952],[-82.1499,30.7843],[-82.2148,30.567],[-82.2498,30.5709],[-82.2581,30.5716],[-82.2873,30.5735],[-82.3748,30.579],[-82.4189,30.5817],[-82.4359,30.8201],[-82.4955,30.8196],[-82.4906,30.9632],[-82.5921,31.0185],[-82.6717,31.1837],[-82.6992,31.2781],[-82.6296,31.2747],[-82.629,31.3639],[-82.6282,31.4694],[-82.5975,31.4693],[-82.4947,31.4687],[-82.4172,31.4171],[-82.3837,31.2911],[-82.2846,31.2244]]]},"id":"13299"},{"type":"Feature","properties":{"NAME":"Wayne","region":9,"region_name":"Heart of Georgia Altamaha"},"geometry":{"type":"Polygon","coordinates":[[[-81.9691,31.7893],[-81.8506,31.6677],[-81.6632,31.5387],[-81.6243,31.453],[-81.692,31.4005],[-81.7317,31.33],[-81.8011,31.3637],[-81.9232,31.3459],[-82.0411,31.3737],[-82.0528,31.4546],[-82.1328,31.4713],[-82.133,31.7734],[-82.0486,31.8271],[-82.0283,31.8155],[-82.0146,31.8218],[-82.0068,31.8],[-81.9819,31.7844],[-81.9691,31.7893]]]},"id":"13305"},{"type":"Feature","properties":{"NAME":"Ben Hill","region":11,"region_name":"Southern Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-83.1775,31.8479],[-82.9957,31.781],[-82.9984,31.6732],[-83.1764,31.6784],[-83.1772,31.6517],[-83.3256,31.6806],[-83.3253,31.7566],[-83.4536,31.7579],[-83.4802,31.8473],[-83.1775,31.8479]]]},"id":"13017"},{"type":"Feature","properties":{"NAME":"Carroll","region":4,"region_name":"Three Rivers"},"geometry":{"type":"Polygon","coordinates":[[[-85.338,33.6531],[-85.0509,33.7146],[-85.0379,33.8119],[-84.9186,33.7863],[-84.9017,33.7807],[-84.9025,33.6611],[-84.9058,33.5734],[-84.8089,33.5741],[-84.8507,33.5115],[-85.0154,33.4255],[-85.2939,33.4281],[-85.3044,33.4829],[-85.314,33.5298],[-85.3141,33.5302],[-85.315,33.5359],[-85.3225,33.5742],[-85.338,33.6531]]]},"id":"13045"},{"type":"Feature","properties":{"NAME":"Richmond","region":7,"region_name":"Central Savannah River Area"},"geometry":{"type":"Polygon","coordinates":[[[-82.0282,33.5449],[-82.0143,33.5303],[-82.0076,33.5233],[-82.0071,33.5228],[-81.967,33.4806],[-81.9579,33.4686],[-81.9126,33.4088],[-81.9027,33.3312],[-81.8521,33.2475],[-81.852,33.2474],[-82.0882,33.2302],[-82.1742,33.2968],[-82.2676,33.2674],[-82.2785,33.2692],[-82.2865,33.2741],[-82.2969,33.2773],[-82.3115,33.2971],[-82.3535,33.3123],[-82.3503,33.3148],[-82.2942,33.3546],[-82.0282,33.5449]]]},"id":"13245"},{"type":"Feature","properties":{"NAME":"Screven","region":12,"region_name":"Coastal"},"geometry":{"type":"Polygon","coordinates":[[[-81.4051,32.745],[-81.4148,32.6374],[-81.4184,32.6347],[-81.4187,32.6294],[-81.4119,32.6184],[-81.3893,32.5954],[-81.3893,32.5954],[-81.5386,32.5091],[-81.548,32.4893],[-81.6896,32.5463],[-81.841,32.6491],[-81.8679,32.6812],[-81.7676,32.9094],[-81.5418,33.0457],[-81.5117,33.0245],[-81.4966,33.0102],[-81.4915,32.9986],[-81.4947,32.979],[-81.4998,32.9638],[-81.4238,32.8105],[-81.4049,32.747],[-81.4051,32.745]]]},"id":"13251"},{"type":"Feature","properties":{"NAME":"Sumter","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.4302,32.1663],[-84.1836,32.1585],[-84.1817,32.2297],[-84.0279,32.1711],[-83.9613,32.0306],[-83.9225,31.9097],[-84.3381,31.9162],[-84.3382,31.8736],[-84.4438,31.9675],[-84.4312,32.1341],[-84.4302,32.1663]]]},"id":"13261"},{"type":"Feature","properties":{"NAME":"Talbot","region":8,"region_name":"River Valley"},"geometry":{"type":"Polygon","coordinates":[[[-84.4444,32.5621],[-84.6373,32.5349],[-84.649,32.535],[-84.658,32.5288],[-84.6617,32.5291],[-84.6782,32.5189],[-84.6863,32.5196],[-84.6945,32.5187],[-84.6946,32.5839],[-84.7005,32.8446],[-84.5707,32.8452],[-84.5069,32.8818],[-84.391,32.787],[-84.2862,32.7476],[-84.3379,32.7206],[-84.4089,32.5619],[-84.4444,32.5621]]]},"id":"13263"},{"type":"Feature","properties":{"NAME":"Terrell","region":10,"region_name":"Southwest Georgia"},"geometry":{"type":"Polygon","coordinates":[[[-84.2978,31.622],[-84.4504,31.6219],[-84.4504,31.6213],[-84.5469,31.6212],[-84.5355,31.6818],[-84.6031,31.772],[-84.5998,31.9202],[-84.4533,31.9192],[-84.4438,31.9675],[-84.3382,31.8736],[-84.2865,31.7912],[-84.2978,31.622]]]},"id":"13273"}]};
-const IMPACT = {"fiscal_year":"FY25","statewide":{"wages":1203143571.51,"employer_expense":236353238.90999994,"employees":21606,"direct_income":1203143571.51,"induced_income":325164975,"total_income":1528308546.51,"induced_employment":5133.010000000001,"value_added":648404440,"output":1031724284},"regions":{"1":{"region":1,"name":"Northwest Georgia","wages":19937068.71,"employer_expense":5067897.889999998,"employees":333,"direct_income":19937068.71,"induced_income":9315983,"total_income":29253051.71,"induced_employment":200.76,"avg_induced_wage":46403.581390715284,"income_multiplier":1.4672694434426714,"jobs_multiplier":1.602882882882883,"value_added":20490403,"output":34484877},"2":{"region":2,"name":"Georgia Mountains","wages":6767213.289999999,"employer_expense":1564032.2600000002,"employees":144,"direct_income":6767213.289999999,"induced_income":16086364,"total_income":22853577.29,"induced_employment":307.21,"avg_induced_wage":52362.76162885323,"income_multiplier":3.3771031458061227,"jobs_multiplier":3.1334027777777775,"value_added":34172516,"output":56778381},"3":{"region":3,"name":"Atlanta Regional Commission","wages":1113607317.78,"employer_expense":214871592.81999993,"employees":19757,"direct_income":1113607317.78,"induced_income":277337352,"total_income":1390944669.78,"induced_employment":4116.72,"avg_induced_wage":67368.52445636332,"income_multiplier":1.2490441177711349,"jobs_multiplier":1.2083676671559447,"value_added":544013966,"output":855699715},"4":{"region":4,"name":"Three Rivers","wages":20905135.379999995,"employer_expense":5530293.829999999,"employees":347,"direct_income":20905135.379999995,"induced_income":8103360,"total_income":29008495.379999995,"induced_employment":186.31,"avg_induced_wage":43493.96167677527,"income_multiplier":1.3876253299824362,"jobs_multiplier":1.5369164265129682,"value_added":17933959,"output":30670689},"5":{"region":5,"name":"Northeast Georgia","wages":20220095.890000008,"employer_expense":5049191.680000002,"employees":384,"direct_income":20220095.890000008,"induced_income":9375884,"total_income":29595979.890000008,"induced_employment":212.46,"avg_induced_wage":44130.11390379365,"income_multiplier":1.46369137174255,"jobs_multiplier":1.5532812500000002,"value_added":21083733,"output":35890792},"6":{"region":6,"name":"Middle Georgia","wages":9837469.340000002,"employer_expense":1910391.8,"employees":206,"direct_income":9837469.340000002,"induced_income":2243524,"total_income":12080993.340000002,"induced_employment":51.9,"avg_induced_wage":43227.82273603083,"income_multiplier":1.2280590589367977,"jobs_multiplier":1.2519417475728154,"value_added":4845940,"output":8379293},"7":{"region":7,"name":"Central Savannah River Area","wages":2821717.43,"employer_expense":560078.41,"employees":107,"direct_income":2821717.43,"induced_income":663229,"total_income":3484946.43,"induced_employment":14.13,"avg_induced_wage":46937.65038924274,"income_multiplier":1.235044442419594,"jobs_multiplier":1.132056074766355,"value_added":1380065,"output":2345939},"8":{"region":8,"name":"River Valley","wages":1179699.53,"employer_expense":197296.47999999998,"employees":58,"direct_income":1179699.53,"induced_income":344200,"total_income":1523899.53,"induced_employment":7.69,"avg_induced_wage":44759.427828348504,"income_multiplier":1.2917692100801295,"jobs_multiplier":1.1325862068965518,"value_added":751270,"output":1288012},"9":{"region":9,"name":"Heart of Georgia Altamaha","wages":947931.8700000001,"employer_expense":176402.56999999998,"employees":25,"direct_income":947931.8700000001,"induced_income":205307,"total_income":1153238.87,"induced_employment":5.22,"avg_induced_wage":39330.84291187739,"income_multiplier":1.2165841306717537,"jobs_multiplier":1.2087999999999999,"value_added":496897,"output":861733},"10":{"region":10,"name":"Southwest Georgia","wages":737142.92,"employer_expense":98763.64,"employees":36,"direct_income":737142.92,"induced_income":145231,"total_income":882373.92,"induced_employment":3.27,"avg_induced_wage":44413.1498470948,"income_multiplier":1.1970187816495612,"jobs_multiplier":1.0908333333333333,"value_added":320308,"output":546312},"11":{"region":11,"name":"Southern Georgia","wages":529394.92,"employer_expense":85932.68000000001,"employees":31,"direct_income":529394.92,"induced_income":119515,"total_income":648909.92,"induced_employment":3,"avg_induced_wage":39838.333333333336,"income_multiplier":1.225757738665116,"jobs_multiplier":1.096774193548387,"value_added":287047,"output":485613},"12":{"region":12,"name":"Coastal","wages":5653384.45,"employer_expense":1241364.8499999999,"employees":178,"direct_income":5653384.45,"induced_income":1225026,"total_income":6878410.45,"induced_employment":24.34,"avg_induced_wage":50329.74527526705,"income_multiplier":1.216688960539381,"jobs_multiplier":1.1367415730337078,"value_added":2628336,"output":4292928}}};
+const IMPACT = {"fiscal_year":"FY25","state_approp_share":0.18594061,"state_approp_amount":557289347.0,"combined":{"direct":{"employment":21606.0,"labor_income":1439496810.42,"value_added":2140794326.0,"output":2997136341.0},"indirect":{"employment":2726.1,"labor_income":199724491.47,"value_added":360827269.41,"output":605312637.29},"induced":{"employment":7008.67,"labor_income":446199549.64,"value_added":882560880.16,"output":1406903210.83},"total":{"employment":31340.77,"labor_income":2085420851.53,"value_added":3384182475.57,"output":5009352189.12}},"employees":{"statewide":{"wages":1203143571.51,"employer_expense":236353238.91,"employees":21606,"direct_income":1439496810.42,"induced_income":388522277.1,"total_income":1828019087.52,"induced_employment":6136.2,"value_added":774847101.1,"output":1233027318.51},"regions":{"1":{"region":1,"name":"Northwest Georgia","wages":19937068.71,"employer_expense":5067897.89,"employees":333,"direct_income":25004966.6,"induced_income":11193615.12,"total_income":36198581.72,"induced_employment":241.22,"value_added":24620233.92,"output":41435286.87},"2":{"region":2,"name":"Georgia Mountains","wages":6767213.29,"employer_expense":1564032.26,"employees":144,"direct_income":8331245.55,"induced_income":19244209.39,"total_income":27575454.94,"induced_employment":367.52,"value_added":40880776.18,"output":67924301.66},"3":{"region":3,"name":"Atlanta Regional Commission","wages":1113607317.78,"employer_expense":214871592.82,"employees":19757,"direct_income":1328478910.6,"induced_income":330961907.33,"total_income":1659440817.93,"induced_employment":4912.71,"value_added":649201750.95,"output":1021153482.85},"4":{"region":4,"name":"Three Rivers","wages":20905135.38,"employer_expense":5530293.83,"employees":347,"direct_income":26435429.21,"induced_income":9842848.86,"total_income":36278278.07,"induced_employment":226.3,"value_added":21783711.64,"output":37254542.45},"5":{"region":5,"name":"Northeast Georgia","wages":20220095.89,"employer_expense":5049191.68,"employees":384,"direct_income":25269287.57,"induced_income":11343898.92,"total_income":36613186.49,"induced_employment":257.06,"value_added":25509247.25,"output":43424334.09},"6":{"region":6,"name":"Middle Georgia","wages":9837469.34,"employer_expense":1910391.8,"employees":206,"direct_income":11747861.14,"induced_income":2684817.31,"total_income":14432678.45,"induced_employment":62.11,"value_added":5799119.01,"output":10027470.53},"7":{"region":7,"name":"Central Savannah River Area","wages":2821717.43,"employer_expense":560078.41,"employees":107,"direct_income":3381795.84,"induced_income":795676.34,"total_income":4177472.18,"induced_employment":16.95,"value_added":1655666.29,"output":2814426.49},"8":{"region":8,"name":"River Valley","wages":1179699.53,"employer_expense":197296.48,"employees":58,"direct_income":1376996.01,"induced_income":411689.64,"total_income":1788685.65,"induced_employment":9.2,"value_added":898575.76,"output":1540560.97},"9":{"region":9,"name":"Heart of Georgia Altamaha","wages":947931.87,"employer_expense":176402.57,"employees":25,"direct_income":1124334.44,"induced_income":245008.41,"total_income":1369342.85,"induced_employment":6.23,"value_added":592984.42,"output":1028370.7},"10":{"region":10,"name":"Southwest Georgia","wages":737142.92,"employer_expense":98763.64,"employees":36,"direct_income":835906.56,"induced_income":166929.61,"total_income":1002836.17,"induced_employment":3.75,"value_added":368162.96,"output":627933.51},"11":{"region":11,"name":"Southern Georgia","wages":529394.92,"employer_expense":85932.68,"employees":31,"direct_income":615327.6,"induced_income":140707.28,"total_income":756034.88,"induced_employment":3.53,"value_added":337947.44,"output":571722.69},"12":{"region":12,"name":"Coastal Regional Commission","wages":5653384.45,"employer_expense":1241364.85,"employees":178,"direct_income":6894749.3,"induced_income":1490968.89,"total_income":8385718.19,"induced_employment":29.62,"value_added":3198925.28,"output":5224885.7}}},"institute":{"statewide":{"inst_spend":444148092.61,"indirect_output":605312637.29,"indirect_emp":2726.1,"indirect_income":199724491.47,"induced_emp":872.47,"induced_output":173875892.32,"induced_income":57677272.54},"regions":{"1":{"region":1,"name":"Northwest Georgia","inst_spend":5274741.93,"indirect_output":8440360.96,"indirect_emp":33.91,"indirect_income":2105774.93,"induced_emp":28.03,"induced_output":4693879.22,"induced_income":1348493.88},"2":{"region":2,"name":"Georgia Mountains","inst_spend":904368.75,"indirect_output":3246862.89,"indirect_emp":11.3,"indirect_income":721459.38,"induced_emp":12.99,"induced_output":2300522.86,"induced_income":678294.67},"3":{"region":3,"name":"Atlanta Regional Commission","inst_spend":419662652.17,"indirect_output":564356502.4,"indirect_emp":2550.42,"indirect_income":189605187.12,"induced_emp":760.06,"induced_output":155336850.09,"induced_income":52419521.1},"4":{"region":4,"name":"Three Rivers","inst_spend":3835948.26,"indirect_output":5896173.43,"indirect_emp":25.14,"indirect_income":1635030.1,"induced_emp":24.08,"induced_output":3805409.68,"induced_income":1080036.37},"5":{"region":5,"name":"Northeast Georgia","inst_spend":4646218.59,"indirect_output":7223236.74,"indirect_emp":25.79,"indirect_income":1337798.59,"induced_emp":27.0,"induced_output":4426422.1,"induced_income":1218983.33},"6":{"region":6,"name":"Middle Georgia","inst_spend":7039582.46,"indirect_output":9773117.12,"indirect_emp":49.5,"indirect_income":2613924.96,"induced_emp":11.83,"induced_output":1902261.57,"induced_income":530895.41},"7":{"region":7,"name":"Central Savannah River Area","inst_spend":376929.0,"indirect_output":1110886.97,"indirect_emp":2.8,"indirect_income":202857.01,"induced_emp":1.58,"induced_output":260062.73,"induced_income":77786.6},"8":{"region":8,"name":"River Valley","inst_spend":330268.2,"indirect_output":807682.69,"indirect_emp":3.25,"indirect_income":184736.51,"induced_emp":1.12,"induced_output":184859.17,"induced_income":51725.01},"9":{"region":9,"name":"Heart of Georgia Altamaha","inst_spend":10360.0,"indirect_output":412062.04,"indirect_emp":1.93,"indirect_income":111235.16,"induced_emp":0.75,"induced_output":119669.58,"induced_income":30167.18},"10":{"region":10,"name":"Southwest Georgia","inst_spend":570686.62,"indirect_output":1371732.34,"indirect_emp":6.68,"indirect_income":391022.64,"induced_emp":1.45,"induced_output":237053.95,"induced_income":65821.25},"11":{"region":11,"name":"Southern Georgia","inst_spend":212802.41,"indirect_output":778752.6,"indirect_emp":5.6,"indirect_income":231012.65,"induced_emp":0.9,"induced_output":144701.84,"induced_income":36827.82},"12":{"region":12,"name":"Coastal Regional Commission","inst_spend":1283534.22,"indirect_output":1895267.11,"indirect_emp":9.78,"indirect_income":584452.42,"induced_emp":2.68,"induced_output":464199.53,"induced_income":138719.92}}}};
 
 const REGION_COLORS = {
   1:"#4E79A7",2:"#59A14F",3:"#E15759",4:"#F28E2B",5:"#76B7B2",6:"#EDC948",
   7:"#B07AA1",8:"#FF9DA7",9:"#9C755F",10:"#86BCB6",11:"#D37295",12:"#8CD17D"
 };
 const fmtUSD = v => {
-  const a = Math.abs(v);
-  if (a >= 1e6) return "$"+d3.format(",.1f")(v/1e6)+"M";
-  if (a >= 1e3) return "$"+d3.format(",.1f")(v/1e3)+"K";
+  const a=Math.abs(v);
+  if(a>=1e9) return "$"+d3.format(",.2f")(v/1e9)+"B";
+  if(a>=1e6) return "$"+d3.format(",.1f")(v/1e6)+"M";
+  if(a>=1e3) return "$"+d3.format(",.1f")(v/1e3)+"K";
   return "$"+d3.format(",.0f")(v);
 };
-const fmtUSDshort = v => "$"+d3.format(".3~s")(v).replace("G","B");
+const fmtUSDshort = v => {
+  const a=Math.abs(v);
+  if(a>=1e9) return "$"+d3.format(",.2f")(v/1e9)+"B";
+  if(a>=1e6) return "$"+d3.format(",.0f")(v/1e6)+"M";
+  return "$"+d3.format(",.0f")(v);
+};
 const fmtNum = v => d3.format(",.0f")(v);
 const fmtNum1 = v => d3.format(",.1f")(v);
 
-// ---- KPIs (count-up animation) ----
-const sw = IMPACT.statewide;
-const kpis = [
-  {v:sw.employees, f:fmtNum, l:"GT employees in Georgia"},
-  {v:sw.wages, f:fmtUSDshort, l:"Employee wages"},
-  {v:Math.round(sw.induced_employment), f:fmtNum, l:"Induced jobs"},
-  {v:sw.output, f:fmtUSDshort, l:"Total economic output"},
-];
-const kpiDivs = d3.select("#kpis").selectAll(".kpi").data(kpis).join("div").attr("class","kpi");
-kpiDivs.append("div").attr("class","v").text("0");
-kpiDivs.append("div").attr("class","l").text(d=>d.l);
-kpiDivs.select(".v").transition().duration(1500).delay((d,i)=>i*120).ease(d3.easeCubicOut)
-  .tween("count",function(d){
-    const interp=d3.interpolateNumber(0,d.v);
-    return t=>{this.textContent=d.f(interp(t));};
-  });
-// hero headline number counts up too
-d3.select("#heroOutput").transition().duration(1600).ease(d3.easeCubicOut)
-  .tween("count",function(){
-    const interp=d3.interpolateNumber(0,sw.output);
-    return t=>{this.textContent=fmtUSDshort(interp(t));};
-  });
+// ---- state ----
+let layer="employees";   // "employees" | "institute" | "students"
+let net=false;           // gross by default
+let mode="region";
+let selected=null;
+const SHARE=IMPACT.state_approp_share;
+const factor=()=> net ? (1-SHARE) : 1;
+const adj=v=> v*factor();
+const hasData=()=> layer!=="students";
+
+// ---- per-layer metric configs (for the "shade map by" dropdown) ----
+const METRICS={
+  employees:[
+    {v:"region",l:"Region (12 colors)"},
+    {v:"employees",l:"Employees",kind:"num",impact:false},
+    {v:"direct_income",l:"Employee compensation",kind:"usd",impact:true},
+    {v:"induced_income",l:"Induced income",kind:"usd",impact:true},
+    {v:"induced_employment",l:"Induced jobs",kind:"num",impact:true},
+    {v:"output",l:"Total output",kind:"usd",impact:true}
+  ],
+  institute:[
+    {v:"region",l:"Region (12 colors)"},
+    {v:"inst_spend",l:"Institute spending",kind:"usd",impact:true},
+    {v:"indirect_output",l:"Indirect output",kind:"usd",impact:true},
+    {v:"indirect_emp",l:"Indirect jobs",kind:"num",impact:true},
+    {v:"indirect_income",l:"Indirect wages",kind:"usd",impact:true},
+    {v:"induced_emp",l:"Induced jobs",kind:"num",impact:true}
+  ],
+  students:[{v:"region",l:"Region (12 colors)"}]
+};
+const CHART_METRIC={employees:"output",institute:"indirect_output"};
+const order=[1,2,3,4,5,6,7,8,9,10,11,12];
+const regions=()=> hasData()?IMPACT[layer].regions:{};
+function metricCfg(m){ return METRICS[layer].find(x=>x.v===m); }
+function metricVal(rg,m){ const c=metricCfg(m); const v=regions()[rg][m]; return (c&&c.impact)?adj(v):v; }
+function fmtMetric(v,m){ const c=metricCfg(m); return (c&&c.kind==="num")?fmtNum(Math.round(v)):fmtUSD(v); }
+function netTag(){ return net?`<span class="dnet">net of state appropriations</span>`:""; }
+
+// ---- KPIs (combined statewide total) ----
+function kpiData(){
+  const t=IMPACT.combined.total;
+  return [
+    {v:adj(t.output),      f:fmtUSDshort,               l:"Total economic output"},
+    {v:adj(t.employment),  f:x=>fmtNum(Math.round(x)),  l:"Jobs supported"},
+    {v:adj(t.labor_income),f:fmtUSDshort,               l:"Labor income"},
+    {v:adj(t.value_added), f:fmtUSDshort,               l:"Value added"}
+  ];
+}
+function renderKPIs(animate){
+  const data=kpiData();
+  const sel=d3.select("#kpis").selectAll(".kpi").data(data);
+  const ent=sel.enter().append("div").attr("class","kpi");
+  ent.append("div").attr("class","v");
+  ent.append("div").attr("class","l");
+  const all=ent.merge(sel);
+  all.select(".l").text(d=>d.l);
+  if(animate){
+    all.select(".v").text("0").transition().duration(1400).delay((d,i)=>i*100).ease(d3.easeCubicOut)
+      .tween("count",function(d){const iv=d3.interpolateNumber(0,d.v);return t=>{this.textContent=d.f(iv(t));};});
+  }else{
+    all.select(".v").text(d=>d.f(d.v));
+  }
+}
+function renderHero(animate){
+  const val=adj(IMPACT.combined.total.output);
+  const el=d3.select("#heroOutput");
+  if(animate){
+    el.transition().duration(1500).ease(d3.easeCubicOut)
+      .tween("count",function(){const iv=d3.interpolateNumber(0,val);return t=>{this.textContent=fmtUSDshort(iv(t));};});
+  }else el.text(fmtUSDshort(val));
+}
+
+// ---- Direct footprint strip ----
+function renderDirect(){
+  const dr=IMPACT.combined.direct;
+  d3.select("#directcard").html(`
+    <span class="dc-lead">Of which &mdash; direct footprint in Georgia</span>
+    <div class="dc-stat"><b>${fmtNum(Math.round(adj(dr.employment)))}</b><span>Georgia Tech employees</span></div>
+    <div class="dc-stat"><b>${fmtUSDshort(adj(dr.labor_income))}</b><span>Direct labor income</span></div>
+    <div class="dc-stat"><b>${fmtUSDshort(adj(dr.output))}</b><span>Direct output</span></div>
+  `);
+}
+
+// ---- Full impact table ----
+function renderFinalTable(){
+  const c=IMPACT.combined;
+  const rowsDef=[["Direct",c.direct],["Indirect",c.indirect],["Induced",c.induced],["Total",c.total]];
+  const body=rowsDef.map(([lbl,o],i)=>{
+    const cls=lbl==="Total"?' class="total"':'';
+    return `<tr${cls}><td>${lbl}</td><td>${fmtNum(Math.round(adj(o.employment)))}</td>`+
+           `<td>${fmtUSD(adj(o.labor_income))}</td><td>${fmtUSD(adj(o.value_added))}</td><td>${fmtUSD(adj(o.output))}</td></tr>`;
+  }).join("");
+  d3.select("#finaltable").html(`<table class="ftbl">
+     <thead><tr><th>Impact type</th><th>Employment</th><th>Labor income</th><th>Value added</th><th>Output</th></tr></thead>
+     <tbody>${body}</tbody></table>`);
+  d3.select("#fttag").html(net?"Shown net of state appropriations.":"Shown as gross impact.");
+}
 
 // ---- Map ----
 const W=720,H=720;
@@ -268,124 +438,214 @@ const svg=d3.select("#map").append("svg").attr("viewBox",`0 0 ${W} ${H}`);
 const proj=d3.geoAlbers().rotate([83.5,0]).fitExtent([[12,12],[W-12,H-12]],COUNTIES);
 const path=d3.geoPath(proj);
 const tip=d3.select("#tip");
-let selected=null, mode="region";
 
 const counties=svg.append("g").selectAll("path").data(COUNTIES.features).join("path")
   .attr("class","county").attr("d",path)
   .attr("fill",d=>REGION_COLORS[d.properties.region])
   .on("mousemove",function(e,d){
-    const r=IMPACT.regions[d.properties.region];
+    const rg=d.properties.region;
+    if(!hasData()){
+      tip.style("opacity",1).html(`<b>${d.properties.NAME} County</b><br>${COUNTIES.features.find(f=>f.properties.region===rg).properties.region_name||""}<br>Student spending — coming soon`)
+         .style("left",(e.pageX+14)+"px").style("top",(e.pageY-10)+"px");
+      return;
+    }
+    const r=regions()[rg];
     let extra="";
-    if(mode!=="region"){extra=`<br>${metricLabel()}: <b>${fmtMetric(r[mode],mode)}</b>`;}
+    if(mode!=="region"){ extra=`<br>${metricCfg(mode).l}: <b>${fmtMetric(metricVal(rg,mode),mode)}</b>`; }
+    const sub = layer==="employees" ? `Employees: ${fmtNum(r.employees)}` : `Institute spend: ${fmtUSD(r.inst_spend)}`;
     tip.style("opacity",1)
-       .html(`<b>${d.properties.NAME} County</b><br>${r.name}<br>Employees: ${fmtNum(r.employees)}${extra}`)
+       .html(`<b>${d.properties.NAME} County</b><br>${r.name}<br>${sub}${extra}`)
        .style("left",(e.pageX+14)+"px").style("top",(e.pageY-10)+"px");
   })
   .on("mouseleave",()=>tip.style("opacity",0))
   .on("click",(e,d)=>selectRegion(d.properties.region));
 
-function selectRegion(rg){
-  if(selected===rg){clearSelection();return;}   // click again to deselect
-  selected=rg;
-  counties.classed("dim",d=>d.properties.region!==rg)
-          .classed("sel-glow",d=>d.properties.region===rg);
-  renderDetail(rg);
-  highlightBar(rg);
-}
-
-function clearSelection(){
-  selected=null;
-  counties.classed("dim",false).classed("sel-glow",false);
-  d3.select("#detail").html('<div class="ph">Select a region on the map to view its Georgia Tech employee economic impact for FY25.</div>');
-  chRows.transition().duration(250).attr("opacity",1);
-}
-document.addEventListener("keydown",e=>{ if(e.key==="Escape") clearSelection(); });
-
-// ---- Legend ----
-const order=Object.keys(IMPACT.regions).map(Number).sort((a,b)=>a-b);
-d3.select("#legend").selectAll("div").data(order).join("div")
-  .html(r=>`<span class="sw" style="background:${REGION_COLORS[r]}"></span>${r}. ${IMPACT.regions[r].name}`)
-  .on("click",(e,r)=>selectRegion(r))
-  .on("mouseenter",(e,r)=>counties.classed("dim",d=>d.properties.region!==r))
-  .on("mouseleave",()=>{ if(selected) counties.classed("dim",d=>d.properties.region!==selected); else counties.classed("dim",false);});
-
-// ---- Detail panel ----
-function renderDetail(rg){
-  const r=IMPACT.regions[rg];
-  const rows=[
-    ["GT employees (live here)",fmtNum(r.employees),"Direct headcount"],
-    ["Employee wages",fmtUSD(r.wages),"Direct income paid"],
-    ["Employer expense",fmtUSD(r.employer_expense),"Benefits, taxes"],
-    ["Induced income",fmtUSD(r.induced_income),"From local spending"],
-    ["Total payroll income",fmtUSD(r.total_income),"Direct + induced"],
-    ["Induced jobs",fmtNum(Math.round(r.induced_employment)),"Supported locally"],
-    ["Value added",fmtUSD(r.value_added),"Regional GDP contribution"],
-    ["Total output",fmtUSD(r.output),"Total economic activity"],
-  ];
-  d3.select("#detail").html(`
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span class="sw" style="width:16px;height:16px;border-radius:4px;background:${REGION_COLORS[rg]};display:inline-block"></span>
-      <div class="rname">${r.name}</div>
-      <button class="closebtn" onclick="clearSelection()" title="Clear selection">&times;</button>
-    </div>
-    <div class="rmeta">Region ${rg} &nbsp;•&nbsp; Georgia Tech employee impact, FY25</div>
-    <div>
-      <span class="pill">Income multiplier ${fmtNum1(r.income_multiplier)}×</span>
-      <span class="pill">Jobs multiplier ${fmtNum1(r.jobs_multiplier)}×</span>
-    </div>
-    <div style="margin-top:12px">
-      ${rows.map(x=>`<div class="stat"><div class="k">${x[0]}<small>${x[2]}</small></div><div class="val">${x[1]}</div></div>`).join("")}
-    </div>
-  `);
-}
-
-// ---- Region comparison chart ----
-const chData = order.map(r=>({r, name:IMPACT.regions[r].name, v:IMPACT.regions[r].output}))
-  .sort((a,b)=>b.v-a.v);
-const chW=340, rowH=35, chH=chData.length*rowH+2;
-const chX=d3.scaleLinear().domain([0,d3.max(chData,d=>d.v)]).range([0,chW-72]);
-const chSvg=d3.select("#chart").append("svg").attr("viewBox",`0 0 ${chW} ${chH}`);
-const chRows=chSvg.selectAll("g").data(chData).join("g")
-  .attr("class","chrow")
-  .attr("transform",(d,i)=>`translate(0,${i*rowH})`)
-  .style("cursor","pointer")
-  .on("click",(e,d)=>selectRegion(d.r))
-  .on("mouseenter",(e,d)=>counties.classed("dim",c=>c.properties.region!==d.r))
-  .on("mouseleave",()=>{ if(selected) counties.classed("dim",c=>c.properties.region!==selected); else counties.classed("dim",false);});
-chRows.append("rect").attr("width",chW).attr("height",rowH).attr("fill","transparent");
-chRows.append("text").attr("x",0).attr("y",11).attr("font-size",10.5).attr("font-weight",500)
-  .attr("fill","#3a434c").text(d=>d.name);
-chRows.append("rect").attr("class","cbar").attr("x",0).attr("y",16).attr("height",11).attr("rx",3)
-  .attr("fill",d=>REGION_COLORS[d.r]).attr("width",0)
-  .transition().duration(900).delay((d,i)=>150+i*45).ease(d3.easeCubicOut)
-  .attr("width",d=>Math.max(2.5,chX(d.v)));
-chRows.append("text").attr("class","cval")
-  .attr("x",d=>Math.max(2.5,chX(d.v))+6).attr("y",25.5)
-  .attr("font-size",10).attr("font-weight",700).attr("fill","#003057")
-  .text(d=>fmtUSDshort(d.v));
-function highlightBar(rg){
-  chRows.transition().duration(250).attr("opacity",d=>d.r===rg?1:.32);
-}
-
-// ---- Metric shading ----
-const metricLabels={employees:"Employees",wages:"Employee wages",total_income:"Total payroll income",induced_employment:"Induced jobs",output:"Total output"};
-function metricLabel(){return metricLabels[mode]||"";}
-function fmtMetric(v,m){return (m==="employees"||m==="induced_employment")?fmtNum(Math.round(v)):fmtUSD(v);}
-
-d3.select("#metric").on("change",function(){
-  mode=this.value;
-  if(mode==="region"){
+function colorMap(){
+  if(mode==="region"||!hasData()){
     counties.transition().duration(400).attr("fill",d=>REGION_COLORS[d.properties.region]);
     d3.select("#legend").style("display","flex");
   }else{
     d3.select("#legend").style("display","none");
-    const vals=order.map(r=>IMPACT.regions[r][mode]);
-    // quantile scale so Atlanta doesn't wash everything out
+    const vals=order.map(r=>metricVal(r,mode));
     const scale=d3.scaleQuantile().domain(vals).range(d3.schemeBlues[7]);
-    counties.transition().duration(400).attr("fill",d=>scale(IMPACT.regions[d.properties.region][mode]));
+    counties.transition().duration(400).attr("fill",d=>scale(metricVal(d.properties.region,mode)));
   }
   if(selected){counties.classed("dim",d=>d.properties.region!==selected);}
+}
+
+function selectRegion(rg){
+  if(selected===rg){clearSelection();return;}
+  selected=rg;
+  counties.classed("dim",d=>d.properties.region!==rg).classed("sel-glow",d=>d.properties.region===rg);
+  renderDetail(rg); highlightBar(rg);
+}
+function clearSelection(){
+  selected=null;
+  counties.classed("dim",false).classed("sel-glow",false);
+  renderDefault();
+  if(chRows) chRows.transition().duration(250).attr("opacity",1);
+}
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") clearSelection(); });
+
+// ---- Legend ----
+d3.select("#legend").selectAll("div").data(order).join("div")
+  .html(r=>`<span class="sw" style="background:${REGION_COLORS[r]}"></span>${r}. ${IMPACT.employees.regions[r].name}`)
+  .on("click",(e,r)=>selectRegion(r))
+  .on("mouseenter",(e,r)=>counties.classed("dim",d=>d.properties.region!==r))
+  .on("mouseleave",()=>{ if(selected) counties.classed("dim",d=>d.properties.region!==selected); else counties.classed("dim",false);});
+
+// ---- Detail panel: statewide layer total (default) ----
+function statRows(arr){
+  return arr.map(x=>`<div class="stat"><div class="k">${x[0]}<small>${x[2]}</small></div><div class="val">${x[1]}</div></div>`).join("");
+}
+function renderDefault(){
+  if(layer==="students"){
+    d3.select("#detail").html(`
+      <div class="ltot">
+        <div class="lt-head">Student spending</div>
+        <div class="lt-sub">Coming soon</div>
+      </div>
+      <div class="ph">The economic impact of Georgia Tech student spending across Georgia is being developed and will appear here in a future update.</div>`);
+    return;
+  }
+  if(layer==="employees"){
+    const s=IMPACT.employees.statewide;
+    d3.select("#detail").html(`
+      <div class="ltot">
+        <div class="lt-head">Georgia Tech employees &mdash; statewide total ${netTag()}</div>
+        <div class="lt-sub">Impact of the 21,606 employees who live in Georgia, FY25. Click a region for local detail.</div>
+      </div>
+      ${statRows([
+        ["GT employees (live in GA)",fmtNum(Math.round(adj(s.employees))),"Direct headcount"],
+        ["Employee compensation",fmtUSD(adj(s.direct_income)),"Wages + benefits + payroll taxes"],
+        ["Induced income",fmtUSD(adj(s.induced_income)),"From employees' local spending"],
+        ["Total statewide income",fmtUSD(adj(s.total_income)),"GT compensation + induced"],
+        ["Induced jobs",fmtNum(Math.round(adj(s.induced_employment))),"Supported locally"],
+        ["Total output",fmtUSD(adj(s.output)),"Total economic activity"]
+      ])}`);
+    return;
+  }
+  // institute
+  const s=IMPACT.institute.statewide;
+  d3.select("#detail").html(`
+    <div class="ltot">
+      <div class="lt-head">Institute spending &mdash; statewide total ${netTag()}</div>
+      <div class="lt-sub">Supplier and household activity generated by Georgia Tech's spending, FY25. Direct on-campus operations are in the headline totals above.</div>
+    </div>
+    ${statRows([
+      ["Institute spending",fmtUSD(adj(s.inst_spend)),"GT purchasing statewide"],
+      ["Indirect output",fmtUSD(adj(s.indirect_output)),"Supplier / vendor activity"],
+      ["Indirect jobs",fmtNum(Math.round(adj(s.indirect_emp))),"At suppliers"],
+      ["Indirect wages",fmtUSD(adj(s.indirect_income)),"Paid at suppliers"],
+      ["Induced jobs",fmtNum(Math.round(adj(s.induced_emp))),"From that spending"]
+    ])}`);
+}
+
+// ---- Detail panel: region ----
+function detailHead(rg,r,meta){
+  return `<div style="display:flex;align-items:center;gap:10px;">
+      <span class="sw" style="width:16px;height:16px;border-radius:4px;background:${REGION_COLORS[rg]};display:inline-block"></span>
+      <div class="rname">${r.name}</div>
+      <button class="closebtn" onclick="clearSelection()" title="Clear selection">&times;</button>
+    </div><div class="rmeta">${meta} ${netTag()}</div>`;
+}
+function renderDetail(rg){
+  if(layer==="students"){ renderDefault(); return; }
+  if(layer==="employees"){
+    const r=IMPACT.employees.regions[rg];
+    const incMult=r.total_income/r.direct_income;
+    const jobsMult=(r.employees+r.induced_employment)/r.employees;
+    d3.select("#detail").html(detailHead(rg,r,`Region ${rg} &nbsp;•&nbsp; Georgia Tech employee impact, FY25`)+`
+      <div><span class="pill">Income multiplier ${fmtNum1(incMult)}×</span><span class="pill">Jobs multiplier ${fmtNum1(jobsMult)}×</span></div>
+      <div style="margin-top:12px">${statRows([
+        ["GT employees (live here)",fmtNum(Math.round(adj(r.employees))),"Direct headcount"],
+        ["Employee compensation",fmtUSD(adj(r.direct_income)),"Wages + benefits + payroll taxes"],
+        ["Induced income",fmtUSD(adj(r.induced_income)),"From employees' local spending"],
+        ["Total regional income",fmtUSD(adj(r.total_income)),"GT compensation + induced"],
+        ["Induced jobs",fmtNum(Math.round(adj(r.induced_employment))),"Supported locally"],
+        ["Total output",fmtUSD(adj(r.output)),"Total economic activity"]
+      ])}</div>`);
+    return;
+  }
+  const r=IMPACT.institute.regions[rg];
+  d3.select("#detail").html(detailHead(rg,r,`Region ${rg} &nbsp;•&nbsp; Institute-spending impact, FY25`)+`
+    <div style="margin-top:12px">${statRows([
+      ["Institute spending here",fmtUSD(adj(r.inst_spend)),"GT purchasing in this region"],
+      ["Indirect output",fmtUSD(adj(r.indirect_output)),"Supplier / vendor activity"],
+      ["Indirect jobs",fmtNum(Math.round(adj(r.indirect_emp))),"At suppliers"],
+      ["Indirect wages",fmtUSD(adj(r.indirect_income)),"Paid at suppliers"],
+      ["Induced jobs",fmtNum(Math.round(adj(r.induced_emp))),"From that spending"]
+    ])}</div>
+    <div class="rmeta" style="margin-top:12px;font-style:italic">Georgia Tech's direct on-campus operations are largely centralized and are counted in the statewide headline totals above.</div>`);
+}
+
+// ---- Region comparison chart ----
+let chRows=null;
+function renderChart(){
+  d3.select("#chart").html("");
+  if(!hasData()){
+    d3.select("#chart").html('<div class="ph" style="padding:24px 6px;text-align:center">Student-spending figures are coming soon.</div>');
+    d3.select("#chartsub").text("Student spending — coming soon");
+    chRows=null; return;
+  }
+  const m=CHART_METRIC[layer];
+  const chData=order.map(r=>({r,name:regions()[r].name,v:metricVal(r,m)})).sort((a,b)=>b.v-a.v);
+  const chW=340,rowH=35,chH=chData.length*rowH+2;
+  const chX=d3.scaleLinear().domain([0,d3.max(chData,d=>d.v)||1]).range([0,chW-80]);
+  const chSvg=d3.select("#chart").append("svg").attr("viewBox",`0 0 ${chW} ${chH}`);
+  chRows=chSvg.selectAll("g").data(chData).join("g").attr("class","chrow")
+    .attr("transform",(d,i)=>`translate(0,${i*rowH})`).style("cursor","pointer")
+    .on("click",(e,d)=>selectRegion(d.r))
+    .on("mouseenter",(e,d)=>counties.classed("dim",c=>c.properties.region!==d.r))
+    .on("mouseleave",()=>{ if(selected) counties.classed("dim",c=>c.properties.region!==selected); else counties.classed("dim",false);});
+  chRows.append("rect").attr("width",chW).attr("height",rowH).attr("fill","transparent");
+  chRows.append("text").attr("x",0).attr("y",11).attr("font-size",10.5).attr("font-weight",500).attr("fill","#3a434c").text(d=>d.name);
+  chRows.append("rect").attr("class","cbar").attr("x",0).attr("y",16).attr("height",11).attr("rx",3)
+    .attr("fill",d=>REGION_COLORS[d.r]).attr("width",d=>Math.max(2.5,chX(d.v)));
+  chRows.append("text").attr("class","cval").attr("x",d=>Math.max(2.5,chX(d.v))+6).attr("y",25.5)
+    .attr("font-size",10).attr("font-weight",700).attr("fill","#003057").text(d=>fmtUSDshort(d.v));
+  if(selected) highlightBar(selected);
+  d3.select("#chartsub").text(
+    (layer==="employees"?"Total economic output":"Institute-spending indirect output")
+    +" by region, FY25"+(net?" — net of state appropriations":"")+" — click a bar to select a region");
+}
+function highlightBar(rg){ if(chRows) chRows.transition().duration(250).attr("opacity",d=>d.r===rg?1:.32); }
+
+// ---- Controls ----
+function rebuildMetricOptions(){
+  const sel=d3.select("#metric"); sel.html("");
+  METRICS[layer].forEach(m=>sel.append("option").attr("value",m.v).text(m.l));
+  mode="region"; sel.property("value","region");
+  sel.property("disabled",!hasData());
+}
+d3.select("#metric").on("change",function(){ mode=this.value; colorMap(); });
+
+d3.selectAll(".layerbtn").on("click",function(){
+  const nl=this.dataset.layer; if(nl===layer) return;
+  layer=nl; selected=null;
+  d3.selectAll(".layerbtn").classed("active",function(){return this.dataset.layer===layer;});
+  counties.classed("dim",false).classed("sel-glow",false);
+  rebuildMetricOptions(); colorMap(); renderChart(); renderDefault();
 });
+
+d3.selectAll(".netbtn").on("click",function(){
+  const nn=(this.dataset.net==="net"); if(nn===net) return;
+  net=nn;
+  d3.selectAll(".netbtn").classed("active",function(){return (this.dataset.net==="net")===net;});
+  d3.select("#netbadge").style("display",net?"inline-flex":"none");
+  renderKPIs(false); renderHero(false); renderDirect(); renderFinalTable(); colorMap(); renderChart();
+  if(selected) renderDetail(selected); else renderDefault();
+});
+
+// ---- init ----
+rebuildMetricOptions();
+renderKPIs(true);
+renderHero(true);
+renderDirect();
+renderFinalTable();
+renderChart();
+renderDefault();
+
 </script>
 </body>
 </html>
