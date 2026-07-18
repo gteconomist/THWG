@@ -159,6 +159,44 @@
   .mapcontrols .controls{margin-bottom:0;}
   .mapwrap{background:transparent;}
   .mapwrap #map{margin-top:2px;}
+  /* ===== Downstream view ===== */
+  .viewswitch{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:12px;
+              padding:5px;gap:4px;margin:0 0 24px;box-shadow:0 2px 10px rgba(0,48,87,.06);}
+  .viewswitch button{font:inherit;font-size:13.5px;font-weight:800;letter-spacing:.2px;border:none;
+              background:none;color:var(--muted);padding:11px 20px;border-radius:8px;cursor:pointer;
+              transition:background .18s,color .18s,box-shadow .18s;}
+  .viewswitch button.active{background:var(--navy);color:#fff;box-shadow:0 3px 10px rgba(0,48,87,.22);}
+  .viewswitch button:not(.active):hover{background:#eef2f6;color:var(--navy);}
+  .dsub{color:var(--muted);font-size:14.5px;max-width:880px;margin:0 0 22px;line-height:1.6;}
+  .tierrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 28px;}
+  .tiercard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+            border-top:3px solid var(--gold);animation:rise .5s ease both;}
+  .tiercard.t2{border-top-color:#7fa8c9;} .tiercard.t3{border-top-color:#c7cdd4;}
+  .tiercard .tt{font-size:12px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px;}
+  .tiercard .tt .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);}
+  .tiercard.t2 .tt .dot{background:#7fa8c9;} .tiercard.t3 .tt .dot{background:#c7cdd4;}
+  .tiercard .td{font-size:12.3px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  .benchpill{display:inline-flex;align-items:center;gap:8px;background:#eef4ee;border:1px solid #cfe3cf;
+             color:#1f6b3a;font-size:12.5px;font-weight:600;border-radius:20px;padding:7px 15px;margin:2px 0 22px;line-height:1.4;}
+  .benchpill .bk{color:#2f8f52;font-weight:900;}
+  .fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:10px;}
+  .fcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+         box-shadow:0 2px 10px rgba(0,48,87,.05);position:relative;animation:rise .5s ease both;}
+  .fcard h4{margin:0 0 4px;font-size:14.5px;color:var(--navy);font-weight:800;padding-right:96px;}
+  .fcard .fdesc{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0 0 9px;}
+  .fcard .fmetrics{font-size:12px;color:#3a434c;line-height:1.6;}
+  .fcard .fmetrics b{color:var(--navy);}
+  .status{position:absolute;top:15px;right:15px;font-size:9.5px;font-weight:800;text-transform:uppercase;
+          letter-spacing:.6px;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+  .status.live{background:#e4f3e8;color:#1f7a3d;}
+  .status.building{background:#fbf3dd;color:#8a6d1e;}
+  .status.planned{background:#eef1f4;color:#5b6670;}
+  .darea{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12.5px;}
+  .darea .dlab{width:196px;color:#3a434c;flex:none;}
+  .darea .dbar{height:12px;border-radius:3px;background:var(--gold);min-width:8px;}
+  .darea .dval{font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .dgrid2{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:start;margin-bottom:28px;}
+  @media(max-width:920px){.tierrow{grid-template-columns:1fr}.fgrid{grid-template-columns:1fr}.dgrid2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -174,6 +212,13 @@
   </div>
 </header>
 <div class="wrap">
+
+  <div class="viewswitch" id="viewswitch">
+    <button data-view="upstream" class="active">Upstream &middot; Traditional Impact</button>
+    <button data-view="downstream">Downstream &middot; Innovation Impact</button>
+  </div>
+
+  <div id="view-upstream">
   <p class="intro">Georgia Tech's economic footprint reaches all 12 of Georgia's economic development regions &mdash; through the employees who live and spend in local communities, and through the Institute's own spending with suppliers and vendors. Use the <b>impact layer</b> switch to explore each, toggle <b>gross / net</b>, and <b>click any region</b> for its FY25 numbers.</p>
 
   <div class="topbar">
@@ -305,6 +350,37 @@
 
   <div class="foot">
     <b>How to read this:</b> The headline figures combine Georgia Tech's total statewide economic impact — direct operations and payroll, supplier purchases (indirect), and the household spending they support (induced). The map explores two layers: where Georgia Tech's 21,606 Georgia employees live and spend, and where the Institute's spending generates supplier and household activity. "Net" figures remove the share of FY25 revenue funded by state appropriations. Source: Georgia Tech Center for Economic Development Research.
+  </div>
+  </div><!-- /#view-upstream -->
+
+  <div id="view-downstream" hidden>
+    <p class="dsub">Downstream impact captures what Georgia Tech sets in motion beyond campus &mdash; the patents, licensed technologies, startups, and federal innovation funding that flow from Institute research into the economy. It is built on a <b>tiered certainty framework</b>: hard, annually-auditable counts are reported separately from broader modeled estimates, each labeled with its level of confidence, so a direct count is never blended with an estimate.</p>
+
+    <div class="tierrow">
+      <div class="tiercard t1"><div class="tt"><span class="dot"></span>Tier 1 &middot; Counted</div><div class="td">Directly counted, standardized, refreshed annually. High certainty. Pairs one-for-one with the upstream impact.</div></div>
+      <div class="tiercard t2"><div class="tt"><span class="dot"></span>Tier 2 &middot; Matched</div><div class="td">Built from matched administrative data with stated assumptions. Medium certainty. In development.</div></div>
+      <div class="tiercard t3"><div class="tt"><span class="dot"></span>Tier 3 &middot; Modeled</div><div class="td">Modeled or survey-based diffusion effects, run as a periodic deep-dive study. Directional.</div></div>
+    </div>
+
+    <div class="seclabel">Tier 1 &middot; Annual Innovation Scorecard <span>directly counted &middot; high certainty</span></div>
+    <div class="kpis" id="dkpis"></div>
+    <div class="benchpill" id="dbench"></div>
+
+    <div class="dgrid2">
+      <div class="panel"><h2>Patents granted per year</h2><div class="sub" id="dtrendsub">U.S. utility patents assigned to Georgia Tech</div><div id="dtrend"></div></div>
+      <div class="panel"><h2>Leading technology areas</h2><div class="sub" id="dareassub">Granted patents by technology area</div><div id="dareas"></div></div>
+    </div>
+
+    <div class="seclabel">Tier 1 &middot; Scorecard families <span>the full annual picture</span></div>
+    <div class="fgrid" id="tier1fams"></div>
+
+    <div class="seclabel" style="margin-top:26px">Tier 2 &middot; Venture growth <span>matched data &middot; in development</span></div>
+    <div class="fgrid" id="tier2fams"></div>
+
+    <div class="seclabel" style="margin-top:26px">Tier 3 &middot; Diffusion &amp; alumni impact <span>modeled &middot; periodic study</span></div>
+    <div class="fgrid" id="tier3fams"></div>
+
+    <div class="foot" id="dfoot"></div>
   </div>
 </div>
 
@@ -645,6 +721,230 @@ renderDirect();
 renderFinalTable();
 renderChart();
 renderDefault();
+
+/* ===================== DOWNSTREAM (Innovation Impact) ===================== */
+/* DOWNSTREAM_DATA_START — regenerated by pipeline/inject_downstream.py */
+const DOWNSTREAM = {
+  "meta": {
+    "latest_year": 2024,
+    "updated": "2026-07-18",
+    "source": "USPTO Open Data Portal; benchmarked to NAI Top 100 Universities"
+  },
+  "familyB": {
+    "latest": {
+      "year": 2024,
+      "patents": 99,
+      "inventors": 299
+    },
+    "benchmark": {
+      "source": "NAI 2024 Top 100 U.S. Universities",
+      "value": 102,
+      "pct": 97
+    },
+    "trend": [
+      {
+        "year": 2015,
+        "patents": 21
+      },
+      {
+        "year": 2016,
+        "patents": 38
+      },
+      {
+        "year": 2017,
+        "patents": 43
+      },
+      {
+        "year": 2018,
+        "patents": 51
+      },
+      {
+        "year": 2019,
+        "patents": 60
+      },
+      {
+        "year": 2020,
+        "patents": 71
+      },
+      {
+        "year": 2021,
+        "patents": 79
+      },
+      {
+        "year": 2022,
+        "patents": 71
+      },
+      {
+        "year": 2023,
+        "patents": 86
+      },
+      {
+        "year": 2024,
+        "patents": 99
+      }
+    ],
+    "techAreas": [
+      {
+        "label": "Polymers & advanced materials",
+        "count": 21
+      },
+      {
+        "label": "Clean energy",
+        "count": 18
+      },
+      {
+        "label": "Measurement & materials testing",
+        "count": 12
+      },
+      {
+        "label": "Pharmaceuticals & therapeutics",
+        "count": 12
+      },
+      {
+        "label": "Semiconductors",
+        "count": 12
+      },
+      {
+        "label": "Medical devices",
+        "count": 11
+      },
+      {
+        "label": "Batteries & fuel cells",
+        "count": 9
+      },
+      {
+        "label": "Computing & data processing",
+        "count": 9
+      },
+      {
+        "label": "Optics & photonics",
+        "count": 8
+      }
+    ]
+  },
+  "families": {
+    "tier1": [
+      {
+        "name": "Patents & inventors",
+        "status": "live",
+        "desc": "U.S. utility patents assigned to Georgia Tech, and the inventors behind them.",
+        "metrics": "<b>99</b> patents granted (2024) &middot; <b>299</b> inventors"
+      },
+      {
+        "name": "Licensing & startups",
+        "status": "building",
+        "desc": "Invention disclosures, licenses & options executed, licensing income, and startups formed &mdash; on AUTM's national definitions.",
+        "metrics": "Source: GT OTL + AUTM licensing survey"
+      },
+      {
+        "name": "Federal innovation funding",
+        "status": "building",
+        "desc": "SBIR / STTR awards flowing to Georgia Tech startups and faculty-affiliated firms.",
+        "metrics": "Source: SBIR.gov, matched to the spinout roster"
+      },
+      {
+        "name": "Industry research engagement",
+        "status": "building",
+        "desc": "Industry-sponsored research expenditures and active corporate research agreements.",
+        "metrics": "Source: GT research accounting + NSF HERD"
+      }
+    ],
+    "tier2": [
+      {
+        "name": "Startup growth & retention",
+        "status": "planned",
+        "desc": "Jobs and follow-on capital at Georgia Tech spinouts, exits, and the share that stay in Georgia &mdash; reported as activity at spinouts, never as GT-attributed totals.",
+        "metrics": "Source: PitchBook / Crunchbase (pending)"
+      }
+    ],
+    "tier3": [
+      {
+        "name": "Alumni entrepreneurship & knowledge diffusion",
+        "status": "planned",
+        "desc": "Aggregate footprint of alumni-founded companies and the geographic spread of Georgia Tech knowledge, with an explicit attribution stance &mdash; after the MIT / Stanford model.",
+        "metrics": "Every 3&ndash;5 years &middot; modeled"
+      }
+    ]
+  }
+};
+/* DOWNSTREAM_DATA_END */
+const fmtInt = d3.format(",.0f");
+function dStatusChip(s){ const l={live:"Live",building:"In development",planned:"Planned"}[s]||s; return `<span class="status ${s}">${l}</span>`; }
+function renderDKPIs(){
+  const b=DOWNSTREAM.familyB, y=b.latest.year;
+  const cards=[
+    {v:fmtInt(b.latest.patents), l:"Patents granted &middot; "+y},
+    {v:fmtInt(b.latest.inventors), l:"Unique inventors &middot; "+y},
+    {v:b.techAreas.length+"+", l:"Technology areas"},
+    {v:b.benchmark.pct+"%", l:"Match vs. national benchmark"}
+  ];
+  const sel=d3.select("#dkpis").selectAll(".kpi").data(cards);
+  const ent=sel.enter().append("div").attr("class","kpi");
+  ent.append("div").attr("class","v"); ent.append("div").attr("class","l");
+  const all=ent.merge(sel);
+  all.select(".v").html(d=>d.v); all.select(".l").html(d=>d.l);
+  d3.select("#dbench").html(`<span class="bk">&#10003;</span><span>Validated: our ${fmtInt(b.latest.patents)} matches ${b.benchmark.value} reported by the ${b.benchmark.source} (USPTO grant data) &mdash; ${b.benchmark.pct}% capture.</span>`);
+}
+function renderDTrend(){
+  const t=DOWNSTREAM.familyB.trend.slice().sort((a,b)=>a.year-b.year);
+  const host=d3.select("#dtrend"); host.html("");
+  if(t.length<2){
+    host.html(`<div class="ph" style="padding:30px 6px;text-align:center">Latest year: <b style="color:var(--navy);font-size:24px">${fmtInt(t[0].patents)}</b> patents (${t[0].year}).<br><span style="color:var(--muted)">The multi-year trend appears here as prior years are pulled.</span></div>`);
+    return;
+  }
+  const W=380,H=200,m={t:16,r:16,b:26,l:32};
+  const x=d3.scalePoint().domain(t.map(d=>d.year)).range([m.l,W-m.r]);
+  const y=d3.scaleLinear().domain([0,d3.max(t,d=>d.patents)*1.18]).range([H-m.b,m.t]);
+  const svg=host.append("svg").attr("viewBox",`0 0 ${W} ${H}`);
+  const step=Math.ceil(t.length/6);
+  svg.append("g").attr("transform",`translate(0,${H-m.b})`)
+     .call(d3.axisBottom(x).tickValues(t.filter((d,i)=>i%step===0).map(d=>d.year)).tickSize(0))
+     .call(g=>g.select(".domain").attr("stroke","#e3e8ee"))
+     .selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
+  svg.append("g").attr("transform",`translate(${m.l},0)`)
+     .call(d3.axisLeft(y).ticks(4).tickSize(-(W-m.l-m.r)))
+     .call(g=>g.select(".domain").remove())
+     .call(g=>g.selectAll("line").attr("stroke","#eef2f6"))
+     .selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
+  const area=d3.area().x(d=>x(d.year)).y0(H-m.b).y1(d=>y(d.patents)).curve(d3.curveMonotoneX);
+  const line=d3.line().x(d=>x(d.year)).y(d=>y(d.patents)).curve(d3.curveMonotoneX);
+  svg.append("path").datum(t).attr("fill","rgba(179,163,105,.18)").attr("d",area);
+  svg.append("path").datum(t).attr("fill","none").attr("stroke","#B3A369").attr("stroke-width",2.5).attr("d",line);
+  svg.selectAll("circle").data(t).join("circle").attr("cx",d=>x(d.year)).attr("cy",d=>y(d.patents)).attr("r",3).attr("fill","#003057");
+  svg.selectAll(".pl").data(t).join("text").attr("class","pl").attr("x",d=>x(d.year)).attr("y",d=>y(d.patents)-8)
+     .attr("text-anchor","middle").attr("font-size",9).attr("font-weight",700).attr("fill","#003057").text(d=>d.patents);
+}
+function renderDAreas(){
+  const a=DOWNSTREAM.familyB.techAreas.slice(0,9);
+  const max=d3.max(a,d=>d.count)||1, wpx=150;
+  d3.select("#dareas").html(a.map(d=>
+    `<div class="darea"><span class="dlab">${d.label}</span><span class="dbar" style="width:${Math.max(8,d.count/max*wpx)}px"></span><span class="dval">${d.count}</span></div>`).join(""));
+}
+function renderDFamilies(){
+  const card=f=>`<div class="fcard">${dStatusChip(f.status)}<h4>${f.name}</h4><div class="fdesc">${f.desc}</div><div class="fmetrics">${f.metrics}</div></div>`;
+  d3.select("#tier1fams").html(DOWNSTREAM.families.tier1.map(card).join(""));
+  d3.select("#tier2fams").html(DOWNSTREAM.families.tier2.map(card).join(""));
+  d3.select("#tier3fams").html(DOWNSTREAM.families.tier3.map(card).join(""));
+  d3.select("#dfoot").html(`<b>How to read this:</b> Tier 1 figures are direct counts, refreshed every year, designed to sit alongside the traditional (upstream) impact. Tier 2 and Tier 3 measures are in development and kept deliberately separate, with their certainty labeled, so a hard count is never blended with a modeled estimate. Patent data: USPTO Open Data Portal (${DOWNSTREAM.meta.updated}). Source: Georgia Tech Center for Economic Development Research.`);
+}
+let downstreamRendered=false;
+function renderDownstream(){
+  if(downstreamRendered) return;
+  renderDKPIs(); renderDTrend(); renderDAreas(); renderDFamilies();
+  downstreamRendered=true;
+}
+const _heroSub=document.querySelector(".hero-sub");
+const _heroUpstream=_heroSub?_heroSub.innerHTML:"";
+const _heroDownstream='Beyond that spending, Georgia Tech drives <span style="color:var(--gold);font-weight:900">downstream innovation impact</span> &mdash; the patents, startups, and technologies that flow from Institute research into the economy.';
+d3.selectAll("#viewswitch button").on("click",function(){
+  const v=this.dataset.view;
+  d3.selectAll("#viewswitch button").classed("active",function(){return this.dataset.view===v;});
+  document.getElementById("view-upstream").hidden=(v!=="upstream");
+  document.getElementById("view-downstream").hidden=(v!=="downstream");
+  if(_heroSub) _heroSub.innerHTML=(v==="downstream")?_heroDownstream:_heroUpstream;
+  if(v==="downstream") renderDownstream();
+  window.scrollTo({top:0,behavior:"smooth"});
+});
 
 </script>
 </body>

@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "latest_year": 2024,
+    "updated": "2026-07-18",
+    "source": "USPTO Open Data Portal; benchmarked to NAI Top 100 Universities"
+  },
+  "familyB": {
+    "latest": {
+      "year": 2024,
+      "patents": 99,
+      "inventors": 299
+    },
+    "benchmark": {
+      "source": "NAI 2024 Top 100 U.S. Universities",
+      "value": 102,
+      "pct": 97
+    },
+    "trend": [
+      {
+        "year": 2015,
+        "patents": 21
+      },
+      {
+        "year": 2016,
+        "patents": 38
+      },
+      {
+        "year": 2017,
+        "patents": 43
+      },
+      {
+        "year": 2018,
+        "patents": 51
+      },
+      {
+        "year": 2019,
+        "patents": 60
+      },
+      {
+        "year": 2020,
+        "patents": 71
+      },
+      {
+        "year": 2021,
+        "patents": 79
+      },
+      {
+        "year": 2022,
+        "patents": 71
+      },
+      {
+        "year": 2023,
+        "patents": 86
+      },
+      {
+        "year": 2024,
+        "patents": 99
+      }
+    ],
+    "techAreas": [
+      {
+        "label": "Polymers & advanced materials",
+        "count": 21
+      },
+      {
+        "label": "Clean energy",
+        "count": 18
+      },
+      {
+        "label": "Measurement & materials testing",
+        "count": 12
+      },
+      {
+        "label": "Pharmaceuticals & therapeutics",
+        "count": 12
+      },
+      {
+        "label": "Semiconductors",
+        "count": 12
+      },
+      {
+        "label": "Medical devices",
+        "count": 11
+      },
+      {
+        "label": "Batteries & fuel cells",
+        "count": 9
+      },
+      {
+        "label": "Computing & data processing",
+        "count": 9
+      },
+      {
+        "label": "Optics & photonics",
+        "count": 8
+      }
+    ]
+  },
+  "families": {
+    "tier1": [
+      {
+        "name": "Patents & inventors",
+        "status": "live",
+        "desc": "U.S. utility patents assigned to Georgia Tech, and the inventors behind them.",
+        "metrics": "<b>99</b> patents granted (2024) &middot; <b>299</b> inventors"
+      },
+      {
+        "name": "Licensing & startups",
+        "status": "building",
+        "desc": "Invention disclosures, licenses & options executed, licensing income, and startups formed &mdash; on AUTM's national definitions.",
+        "metrics": "Source: GT OTL + AUTM licensing survey"
+      },
+      {
+        "name": "Federal innovation funding",
+        "status": "building",
+        "desc": "SBIR / STTR awards flowing to Georgia Tech startups and faculty-affiliated firms.",
+        "metrics": "Source: SBIR.gov, matched to the spinout roster"
+      },
+      {
+        "name": "Industry research engagement",
+        "status": "building",
+        "desc": "Industry-sponsored research expenditures and active corporate research agreements.",
+        "metrics": "Source: GT research accounting + NSF HERD"
+      }
+    ],
+    "tier2": [
+      {
+        "name": "Startup growth & retention",
+        "status": "planned",
+        "desc": "Jobs and follow-on capital at Georgia Tech spinouts, exits, and the share that stay in Georgia &mdash; reported as activity at spinouts, never as GT-attributed totals.",
+        "metrics": "Source: PitchBook / Crunchbase (pending)"
+      }
+    ],
+    "tier3": [
+      {
+        "name": "Alumni entrepreneurship & knowledge diffusion",
+        "status": "planned",
+        "desc": "Aggregate footprint of alumni-founded companies and the geographic spread of Georgia Tech knowledge, with an explicit attribution stance &mdash; after the MIT / Stanford model.",
+        "metrics": "Every 3&ndash;5 years &middot; modeled"
+      }
+    ]
+  }
+}

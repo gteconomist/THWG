@@ -1,0 +1,14 @@
+{
+  "_comment": "Pinned GT assignee-name disambiguation list. Track 1 metric B-family queries these against PatentsView assignees.assignee_organization. Add historical/variant spellings here as they surface; this file is the single source of truth for 'what counts as a GT patent'.",
+  "assignee_name_variants": [
+    "Georgia Tech Research Corporation",
+    "Georgia Tech Research Corp",
+    "Georgia Institute of Technology",
+    "Georgia Tech Research Institute"
+  ],
+  "notes": {
+    "Georgia Tech Research Corporation": "Primary assignee for GT-owned IP (GTRC holds most licensed patents).",
+    "Georgia Tech Research Institute": "GTRI (applied research arm) — CONFIRMED IN SCOPE by Alfie 2026-07-17. Keep.",
+    "review": "Run scripts/audit_assignees.py periodically to catch new spelling variants in granted patents."
+  }
+}
