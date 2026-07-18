@@ -70,8 +70,8 @@ FAMILIES = {
          "desc": "Invention disclosures, licenses & options executed, licensing income, and startups formed &mdash; on AUTM's national definitions.",
          "metrics": "Source: GT OTL + AUTM licensing survey"},
         {"name": "Federal innovation funding", "status": "building",
-         "desc": "SBIR / STTR awards flowing to Georgia Tech startups and faculty-affiliated firms.",
-         "metrics": "Source: SBIR.gov, matched to the spinout roster"},
+         "desc": "SBIR / STTR awards where Georgia Tech is the named research institution &mdash; federally-funded innovation projects built on GT research (mostly STTR, which requires a university partner).",
+         "metrics": "Source: SBIR.gov bulk award data"},
         {"name": "Industry research engagement", "status": "building",
          "desc": "Industry-sponsored research expenditures and active corporate research agreements.",
          "metrics": "Source: GT research accounting + NSF HERD"},
@@ -91,6 +91,28 @@ FAMILIES = {
 
 def label_for(code: str) -> str:
     return CPC_LABELS.get(code, f"CPC {code}")
+
+
+def build_family_d(output_dir: Path):
+    """Read the widest SBIR/STTR summary, if present, to bring Family D live."""
+    files = list(output_dir.glob("sbir_summary_*.json"))
+    if not files:
+        return None
+    best = max((json.loads(p.read_text()) for p in files), key=lambda s: s.get("D1_total_awards", 0))
+    n = best.get("D1_total_awards", 0)
+    if not n:
+        return None
+    amt = best.get("D1_total_amount", 0.0)
+    yr = best.get("metric_provenance", {}).get("year_range", [None, None])
+    span = f"{yr[0]}&ndash;{yr[1]}" if yr and yr[0] else "all years"
+    top_agency = next(iter(best.get("by_agency", {})), None)
+    top_txt = f" &middot; {top_agency.replace('Department of ', '')}-led" if top_agency else ""
+    metrics = (f"<b>{n}</b> SBIR/STTR awards &middot; <b>${amt/1e6:.1f}M</b> project value "
+               f"&middot; {span}{top_txt}")
+    return {"metrics": metrics,
+            "data": {"total_awards": n, "total_amount": round(amt, 2), "span": span,
+                     "by_year": best.get("by_year", {}), "by_agency": best.get("by_agency", {}),
+                     "by_program": best.get("by_program", {})}}
 
 
 def build_data() -> dict:
@@ -118,10 +140,18 @@ def build_data() -> dict:
         f"<b>{latest.get('B1_patents_granted', 0)}</b> patents granted ({latest_year}) "
         f"&middot; <b>{latest.get('B2_unique_inventors', 0)}</b> inventors")
 
-    return {
+    # Family D (SBIR/STTR) — bring the card live if a summary exists.
+    fd = build_family_d(OUTPUT_DIR)
+    if fd:
+        for fam in families["tier1"]:
+            if fam["name"] == "Federal innovation funding":
+                fam["status"] = "live"
+                fam["metrics"] = fd["metrics"]
+
+    result = {
         "meta": {"latest_year": latest_year,
                  "updated": datetime.date.today().isoformat(),
-                 "source": "USPTO Open Data Portal; benchmarked to NAI Top 100 Universities"},
+                 "source": "USPTO Open Data Portal + SBIR.gov; benchmarked to NAI Top 100 Universities"},
         "familyB": {
             "latest": {"year": latest_year,
                        "patents": latest.get("B1_patents_granted", 0),
@@ -132,6 +162,9 @@ def build_data() -> dict:
         },
         "families": families,
     }
+    if fd:
+        result["familyD"] = fd["data"]
+    return result
 
 
 def inject(data: dict) -> None:

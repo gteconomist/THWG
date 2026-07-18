@@ -6,9 +6,16 @@
     "Georgia Institute of Technology",
     "Georgia Tech Research Institute"
   ],
+  "sbir_research_institution_variants": [
+    "Georgia Institute of Technology",
+    "Georgia Tech Research Corporation",
+    "Georgia Tech Research Institute",
+    "Georgia Tech"
+  ],
   "notes": {
     "Georgia Tech Research Corporation": "Primary assignee for GT-owned IP (GTRC holds most licensed patents).",
     "Georgia Tech Research Institute": "GTRI (applied research arm) — CONFIRMED IN SCOPE by Alfie 2026-07-17. Keep.",
+    "sbir_research_institution_variants": "Names GT appears under as the RESEARCH INSTITUTION (ri_name) on SBIR/STTR awards. Used by pull_sbir.py (Family D). Distinct from patent assignee names.",
     "review": "Run scripts/audit_assignees.py periodically to catch new spelling variants in granted patents."
   }
 }

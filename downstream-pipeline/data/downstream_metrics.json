@@ -2,7 +2,7 @@
   "meta": {
     "latest_year": 2024,
     "updated": "2026-07-18",
-    "source": "USPTO Open Data Portal; benchmarked to NAI Top 100 Universities"
+    "source": "USPTO Open Data Portal + SBIR.gov; benchmarked to NAI Top 100 Universities"
   },
   "familyB": {
     "latest": {
@@ -112,9 +112,9 @@
       },
       {
         "name": "Federal innovation funding",
-        "status": "building",
-        "desc": "SBIR / STTR awards flowing to Georgia Tech startups and faculty-affiliated firms.",
-        "metrics": "Source: SBIR.gov, matched to the spinout roster"
+        "status": "live",
+        "desc": "SBIR / STTR awards where Georgia Tech is the named research institution &mdash; federally-funded innovation projects built on GT research (mostly STTR, which requires a university partner).",
+        "metrics": "<b>142</b> SBIR/STTR awards &middot; <b>$74.3M</b> project value &middot; 2015&ndash;2024 &middot; Defense-led"
       },
       {
         "name": "Industry research engagement",
@@ -139,5 +139,84 @@
         "metrics": "Every 3&ndash;5 years &middot; modeled"
       }
     ]
+  },
+  "familyD": {
+    "total_awards": 142,
+    "total_amount": 74279074.63,
+    "span": "2015&ndash;2024",
+    "by_year": {
+      "2015": {
+        "count": 11,
+        "amount": 4147810.0
+      },
+      "2016": {
+        "count": 7,
+        "amount": 4769056.62
+      },
+      "2017": {
+        "count": 12,
+        "amount": 5140694.0
+      },
+      "2018": {
+        "count": 7,
+        "amount": 2179037.0
+      },
+      "2019": {
+        "count": 10,
+        "amount": 6168042.55
+      },
+      "2020": {
+        "count": 15,
+        "amount": 9361562.0
+      },
+      "2021": {
+        "count": 27,
+        "amount": 14063288.0
+      },
+      "2022": {
+        "count": 19,
+        "amount": 8659978.0
+      },
+      "2023": {
+        "count": 16,
+        "amount": 9777927.46
+      },
+      "2024": {
+        "count": 18,
+        "amount": 10011679.0
+      }
+    },
+    "by_agency": {
+      "Department of Defense": {
+        "count": 108,
+        "amount": 60309393.01
+      },
+      "Department of Energy": {
+        "count": 10,
+        "amount": 4855820.62
+      },
+      "National Aeronautics and Space Administration": {
+        "count": 14,
+        "amount": 4445101.0
+      },
+      "Department of Health and Human Services": {
+        "count": 6,
+        "amount": 3619688.0
+      },
+      "National Science Foundation": {
+        "count": 4,
+        "amount": 1049072.0
+      }
+    },
+    "by_program": {
+      "STTR": {
+        "count": 141,
+        "amount": 72679212.63
+      },
+      "SBIR": {
+        "count": 1,
+        "amount": 1599862.0
+      }
+    }
   }
 }
