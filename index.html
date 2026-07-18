@@ -380,6 +380,15 @@
     </div>
     </div>
 
+    <div id="talBlock">
+    <div class="seclabel" style="margin-top:26px">Tier 1 &middot; Talent into the innovation economy <span>degrees conferred &middot; directly counted</span></div>
+    <div class="kpis" id="dkpisTal"></div>
+    <div class="dgrid2">
+      <div class="panel"><h2>Degrees conferred per year</h2><div class="sub">Georgia Tech degrees (NCES IPEDS)</div><div id="dtrendTal"></div></div>
+      <div class="panel"><h2>By level</h2><div class="sub" id="dlevelssub">Most recent year</div><div id="dlevelsTal"></div></div>
+    </div>
+    </div>
+
     <div class="seclabel">Tier 1 &middot; Scorecard families <span>the full annual picture</span></div>
     <div class="fgrid" id="tier1fams"></div>
 
@@ -840,6 +849,12 @@ const DOWNSTREAM = {
         "metrics": "<b>99</b> patents granted (2024) &middot; <b>299</b> inventors"
       },
       {
+        "name": "Talent into the innovation economy",
+        "status": "live",
+        "desc": "Degrees Georgia Tech confers each year &mdash; the STEM talent flowing into the workforce and startup ecosystem.",
+        "metrics": "<b>12,202</b> degrees (2024) &middot; <b>7,054</b> master's &middot; <b>572</b> doctoral"
+      },
+      {
         "name": "Licensing & startups",
         "status": "building",
         "desc": "Invention disclosures, licenses & options executed, licensing income, and startups formed &mdash; on AUTM's national definitions.",
@@ -959,6 +974,87 @@ const DOWNSTREAM = {
         "amount": 1599862.0
       }
     }
+  },
+  "familyF": {
+    "latest": {
+      "year": 2024,
+      "bachelors": 4576,
+      "masters": 7054,
+      "doctoral": 572,
+      "degrees": 12202
+    },
+    "trend": [
+      {
+        "year": 2015,
+        "bachelors": 3274,
+        "masters": 1882,
+        "doctoral": 526,
+        "degrees": 5682
+      },
+      {
+        "year": 2016,
+        "bachelors": 3419,
+        "masters": 2296,
+        "doctoral": 531,
+        "degrees": 6246
+      },
+      {
+        "year": 2017,
+        "bachelors": 3607,
+        "masters": 2561,
+        "doctoral": 508,
+        "degrees": 6676
+      },
+      {
+        "year": 2018,
+        "bachelors": 3516,
+        "masters": 3043,
+        "doctoral": 530,
+        "degrees": 7089
+      },
+      {
+        "year": 2019,
+        "bachelors": 3717,
+        "masters": 3238,
+        "doctoral": 526,
+        "degrees": 7481
+      },
+      {
+        "year": 2020,
+        "bachelors": 3934,
+        "masters": 4072,
+        "doctoral": 527,
+        "degrees": 8533
+      },
+      {
+        "year": 2021,
+        "bachelors": 3879,
+        "masters": 4762,
+        "doctoral": 577,
+        "degrees": 9218
+      },
+      {
+        "year": 2022,
+        "bachelors": 4015,
+        "masters": 5376,
+        "doctoral": 561,
+        "degrees": 9952
+      },
+      {
+        "year": 2023,
+        "bachelors": 4227,
+        "masters": 6610,
+        "doctoral": 556,
+        "degrees": 11393
+      },
+      {
+        "year": 2024,
+        "bachelors": 4576,
+        "masters": 7054,
+        "doctoral": 572,
+        "degrees": 12202
+      }
+    ]
   }
 };
 /* DOWNSTREAM_DATA_END */
@@ -1074,11 +1170,61 @@ function renderDAgencies(){
   d3.select("#dagencies").html(a.map(x=>
     `<div class="darea"><span class="dlab">${x.label}</span><span class="dbar" style="width:${Math.max(8,x.amount/max*wpx)}px"></span><span class="dval">$${(x.amount/1e6).toFixed(1)}M</span></div>`).join(""));
 }
+function renderDKPIsTal(){
+  const d=DOWNSTREAM.familyF, block=document.getElementById("talBlock");
+  if(!d){ if(block) block.hidden=true; return; }
+  const L=d.latest;
+  const cards=[
+    {v:fmtInt(L.degrees), l:"Degrees conferred &middot; "+L.year},
+    {v:fmtInt(L.bachelors), l:"Bachelor's &middot; "+L.year},
+    {v:fmtInt(L.masters), l:"Master's &middot; "+L.year},
+    {v:fmtInt(L.doctoral), l:"Doctoral &middot; "+L.year}
+  ];
+  const sel=d3.select("#dkpisTal").selectAll(".kpi").data(cards);
+  const ent=sel.enter().append("div").attr("class","kpi");
+  ent.append("div").attr("class","v"); ent.append("div").attr("class","l");
+  const all=ent.merge(sel);
+  all.select(".v").html(x=>x.v); all.select(".l").html(x=>x.l);
+}
+function renderDTrendTal(){
+  const d=DOWNSTREAM.familyF; if(!d) return;
+  const t=(d.trend||[]).slice().sort((a,b)=>a.year-b.year);
+  const host=d3.select("#dtrendTal"); host.html("");
+  if(t.length<2){ host.html('<div class="ph" style="padding:26px 6px;text-align:center">One year of data.</div>'); return; }
+  const W=380,H=200,m={t:16,r:16,b:26,l:46};
+  const x=d3.scalePoint().domain(t.map(d=>d.year)).range([m.l,W-m.r]);
+  const y=d3.scaleLinear().domain([0,d3.max(t,d=>d.degrees)*1.18]).range([H-m.b,m.t]);
+  const svg=host.append("svg").attr("viewBox",`0 0 ${W} ${H}`);
+  const step=Math.ceil(t.length/6);
+  svg.append("g").attr("transform",`translate(0,${H-m.b})`)
+     .call(d3.axisBottom(x).tickValues(t.filter((d,i)=>i%step===0).map(d=>d.year)).tickSize(0))
+     .call(g=>g.select(".domain").attr("stroke","#e3e8ee")).selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
+  svg.append("g").attr("transform",`translate(${m.l},0)`)
+     .call(d3.axisLeft(y).ticks(4).tickFormat(v=>d3.format(",.0f")(v)).tickSize(-(W-m.l-m.r)))
+     .call(g=>g.select(".domain").remove()).call(g=>g.selectAll("line").attr("stroke","#eef2f6"))
+     .selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
+  const area=d3.area().x(d=>x(d.year)).y0(H-m.b).y1(d=>y(d.degrees)).curve(d3.curveMonotoneX);
+  const line=d3.line().x(d=>x(d.year)).y(d=>y(d.degrees)).curve(d3.curveMonotoneX);
+  svg.append("path").datum(t).attr("fill","rgba(179,163,105,.18)").attr("d",area);
+  svg.append("path").datum(t).attr("fill","none").attr("stroke","#B3A369").attr("stroke-width",2.5).attr("d",line);
+  svg.selectAll("circle").data(t).join("circle").attr("cx",d=>x(d.year)).attr("cy",d=>y(d.degrees)).attr("r",3).attr("fill","#003057");
+}
+function renderDLevelsTal(){
+  const d=DOWNSTREAM.familyF; if(!d) return;
+  const L=d.latest;
+  const a=[{label:"Master's",v:L.masters},{label:"Bachelor's",v:L.bachelors},{label:"Doctoral",v:L.doctoral}]
+    .sort((x,y)=>y.v-x.v);
+  const max=d3.max(a,x=>x.v)||1, wpx=150;
+  d3.select("#dlevelssub").html("Degrees by level &middot; "+L.year);
+  d3.select("#dlevelsTal").html(a.map(x=>
+    `<div class="darea"><span class="dlab">${x.label}</span><span class="dbar" style="width:${Math.max(8,x.v/max*wpx)}px"></span><span class="dval">${fmtInt(x.v)}</span></div>`).join(""));
+}
 let downstreamRendered=false;
 function renderDownstream(){
   if(downstreamRendered) return;
   renderDKPIs(); renderDTrend(); renderDAreas();
   renderDKPIsFed(); renderDTrendFed(); renderDAgencies();
+  renderDKPIsTal(); renderDTrendTal(); renderDLevelsTal();
   renderDFamilies();
   downstreamRendered=true;
 }

@@ -105,6 +105,12 @@
         "metrics": "<b>99</b> patents granted (2024) &middot; <b>299</b> inventors"
       },
       {
+        "name": "Talent into the innovation economy",
+        "status": "live",
+        "desc": "Degrees Georgia Tech confers each year &mdash; the STEM talent flowing into the workforce and startup ecosystem.",
+        "metrics": "<b>12,202</b> degrees (2024) &middot; <b>7,054</b> master's &middot; <b>572</b> doctoral"
+      },
+      {
         "name": "Licensing & startups",
         "status": "building",
         "desc": "Invention disclosures, licenses & options executed, licensing income, and startups formed &mdash; on AUTM's national definitions.",
@@ -224,5 +230,86 @@
         "amount": 1599862.0
       }
     }
+  },
+  "familyF": {
+    "latest": {
+      "year": 2024,
+      "bachelors": 4576,
+      "masters": 7054,
+      "doctoral": 572,
+      "degrees": 12202
+    },
+    "trend": [
+      {
+        "year": 2015,
+        "bachelors": 3274,
+        "masters": 1882,
+        "doctoral": 526,
+        "degrees": 5682
+      },
+      {
+        "year": 2016,
+        "bachelors": 3419,
+        "masters": 2296,
+        "doctoral": 531,
+        "degrees": 6246
+      },
+      {
+        "year": 2017,
+        "bachelors": 3607,
+        "masters": 2561,
+        "doctoral": 508,
+        "degrees": 6676
+      },
+      {
+        "year": 2018,
+        "bachelors": 3516,
+        "masters": 3043,
+        "doctoral": 530,
+        "degrees": 7089
+      },
+      {
+        "year": 2019,
+        "bachelors": 3717,
+        "masters": 3238,
+        "doctoral": 526,
+        "degrees": 7481
+      },
+      {
+        "year": 2020,
+        "bachelors": 3934,
+        "masters": 4072,
+        "doctoral": 527,
+        "degrees": 8533
+      },
+      {
+        "year": 2021,
+        "bachelors": 3879,
+        "masters": 4762,
+        "doctoral": 577,
+        "degrees": 9218
+      },
+      {
+        "year": 2022,
+        "bachelors": 4015,
+        "masters": 5376,
+        "doctoral": 561,
+        "degrees": 9952
+      },
+      {
+        "year": 2023,
+        "bachelors": 4227,
+        "masters": 6610,
+        "doctoral": 556,
+        "degrees": 11393
+      },
+      {
+        "year": 2024,
+        "bachelors": 4576,
+        "masters": 7054,
+        "doctoral": 572,
+        "degrees": 12202
+      }
+    ]
   }
 }

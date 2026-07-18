@@ -66,6 +66,9 @@ FAMILIES = {
         {"name": "Patents & inventors", "status": "live",
          "desc": "U.S. utility patents assigned to Georgia Tech, and the inventors behind them.",
          "metrics": "__FAMILY_B_METRICS__"},
+        {"name": "Talent into the innovation economy", "status": "building",
+         "desc": "Degrees Georgia Tech confers each year &mdash; the STEM talent flowing into the workforce and startup ecosystem.",
+         "metrics": "__FAMILY_F_METRICS__"},
         {"name": "Licensing & startups", "status": "building",
          "desc": "Invention disclosures, licenses & options executed, licensing income, and startups formed &mdash; on AUTM's national definitions.",
          "metrics": "Source: GT OTL + AUTM licensing survey"},
@@ -121,6 +124,21 @@ def build_family_d(output_dir: Path):
                      "by_program": best.get("by_program", {})}}
 
 
+def build_family_f(output_dir: Path):
+    """Read IPEDS degrees-conferred summary, if present, to bring Family F live."""
+    p = output_dir / "ipeds_summary.json"
+    if not p.exists():
+        return None
+    s = json.loads(p.read_text())
+    L = s.get("F1_latest")
+    trend = s.get("trend", [])
+    if not L or not L.get("degrees"):
+        return None
+    metrics = (f"<b>{L['degrees']:,}</b> degrees ({L['year']}) &middot; "
+               f"<b>{L['masters']:,}</b> master's &middot; <b>{L['doctoral']:,}</b> doctoral")
+    return {"metrics": metrics, "data": {"latest": L, "trend": trend}}
+
+
 def build_data() -> dict:
     summaries = {}
     for p in sorted(OUTPUT_DIR.glob("gt_patents_*_summary.json")):
@@ -154,6 +172,14 @@ def build_data() -> dict:
                 fam["status"] = "live"
                 fam["metrics"] = fd["metrics"]
 
+    # Family F (IPEDS degrees) — bring the card live if a summary exists.
+    ff = build_family_f(OUTPUT_DIR)
+    if ff:
+        for fam in families["tier1"]:
+            if fam["name"] == "Talent into the innovation economy":
+                fam["status"] = "live"
+                fam["metrics"] = ff["metrics"]
+
     result = {
         "meta": {"latest_year": latest_year,
                  "updated": datetime.date.today().isoformat(),
@@ -170,6 +196,8 @@ def build_data() -> dict:
     }
     if fd:
         result["familyD"] = fd["data"]
+    if ff:
+        result["familyF"] = ff["data"]
     return result
 
 
