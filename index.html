@@ -362,13 +362,22 @@
       <div class="tiercard t3"><div class="tt"><span class="dot"></span>Tier 3 &middot; Modeled</div><div class="td">Modeled or survey-based diffusion effects, run as a periodic deep-dive study. Directional.</div></div>
     </div>
 
-    <div class="seclabel">Tier 1 &middot; Annual Innovation Scorecard <span>directly counted &middot; high certainty</span></div>
+    <div class="seclabel">Tier 1 &middot; Patents &amp; inventors <span>U.S. utility patents &middot; directly counted</span></div>
     <div class="kpis" id="dkpis"></div>
     <div class="benchpill" id="dbench"></div>
 
     <div class="dgrid2">
       <div class="panel"><h2>Patents granted per year</h2><div class="sub" id="dtrendsub">U.S. utility patents assigned to Georgia Tech</div><div id="dtrend"></div></div>
       <div class="panel"><h2>Leading technology areas</h2><div class="sub" id="dareassub">Granted patents by technology area</div><div id="dareas"></div></div>
+    </div>
+
+    <div id="fedBlock">
+    <div class="seclabel" style="margin-top:26px">Tier 1 &middot; Federal innovation funding <span>SBIR/STTR &middot; GT as research institution</span></div>
+    <div class="kpis" id="dkpisFed"></div>
+    <div class="dgrid2">
+      <div class="panel"><h2>Project value per year</h2><div class="sub">SBIR/STTR awards naming Georgia Tech as research institution</div><div id="dtrendFed"></div></div>
+      <div class="panel"><h2>By funding agency</h2><div class="sub">Total project value 2015&ndash;2024</div><div id="dagencies"></div></div>
+    </div>
     </div>
 
     <div class="seclabel">Tier 1 &middot; Scorecard families <span>the full annual picture</span></div>
@@ -840,7 +849,7 @@ const DOWNSTREAM = {
         "name": "Federal innovation funding",
         "status": "live",
         "desc": "SBIR / STTR awards where Georgia Tech is the named research institution &mdash; federally-funded innovation projects built on GT research (mostly STTR, which requires a university partner).",
-        "metrics": "<b>142</b> SBIR/STTR awards &middot; <b>$74.3M</b> project value &middot; 2015&ndash;2024 &middot; Defense-led"
+        "metrics": "<b>18</b> SBIR/STTR awards &middot; <b>$10.0M</b> project value &middot; 2024"
       },
       {
         "name": "Industry research engagement",
@@ -867,9 +876,15 @@ const DOWNSTREAM = {
     ]
   },
   "familyD": {
-    "total_awards": 142,
-    "total_amount": 74279074.63,
-    "span": "2015&ndash;2024",
+    "latest_year": 2024,
+    "latest_awards": 18,
+    "latest_amount": 10011679.0,
+    "cumulative_awards": 142,
+    "cumulative_amount": 74279074.63,
+    "span": [
+      2015,
+      2024
+    ],
     "by_year": {
       "2015": {
         "count": 11,
@@ -1006,10 +1021,65 @@ function renderDFamilies(){
   d3.select("#tier3fams").html(DOWNSTREAM.families.tier3.map(card).join(""));
   d3.select("#dfoot").html(`<b>How to read this:</b> Tier 1 figures are direct counts, refreshed every year, designed to sit alongside the traditional (upstream) impact. Tier 2 and Tier 3 measures are in development and kept deliberately separate, with their certainty labeled, so a hard count is never blended with a modeled estimate. Patent data: USPTO Open Data Portal (${DOWNSTREAM.meta.updated}). Source: Georgia Tech Center for Economic Development Research.`);
 }
+function agencyShort(name){
+  return (name||"").replace("Department of ","")
+    .replace("National Aeronautics and Space Administration","NASA")
+    .replace("National Science Foundation","NSF")
+    .replace("Health and Human Services","HHS");
+}
+function renderDKPIsFed(){
+  const d=DOWNSTREAM.familyD, block=document.getElementById("fedBlock");
+  if(!d){ if(block) block.hidden=true; return; }
+  const agencies=Object.keys(d.by_agency||{}).length;
+  const cards=[
+    {v:fmtInt(d.latest_awards), l:"Awards &middot; "+d.latest_year},
+    {v:"$"+(d.latest_amount/1e6).toFixed(1)+"M", l:"Project value &middot; "+d.latest_year},
+    {v:"$"+(d.cumulative_amount/1e6).toFixed(1)+"M", l:"Cumulative &middot; since "+d.span[0]},
+    {v:fmtInt(agencies), l:"Federal agencies"}
+  ];
+  const sel=d3.select("#dkpisFed").selectAll(".kpi").data(cards);
+  const ent=sel.enter().append("div").attr("class","kpi");
+  ent.append("div").attr("class","v"); ent.append("div").attr("class","l");
+  const all=ent.merge(sel);
+  all.select(".v").html(x=>x.v); all.select(".l").html(x=>x.l);
+}
+function renderDTrendFed(){
+  const d=DOWNSTREAM.familyD; if(!d) return;
+  const t=Object.keys(d.by_year).map(y=>({year:+y,amount:d.by_year[y].amount})).sort((a,b)=>a.year-b.year);
+  const host=d3.select("#dtrendFed"); host.html("");
+  if(t.length<2){ host.html('<div class="ph" style="padding:26px 6px;text-align:center">One year of data.</div>'); return; }
+  const W=380,H=200,m={t:16,r:16,b:26,l:42};
+  const x=d3.scalePoint().domain(t.map(d=>d.year)).range([m.l,W-m.r]);
+  const y=d3.scaleLinear().domain([0,d3.max(t,d=>d.amount)*1.18]).range([H-m.b,m.t]);
+  const svg=host.append("svg").attr("viewBox",`0 0 ${W} ${H}`);
+  const step=Math.ceil(t.length/6);
+  svg.append("g").attr("transform",`translate(0,${H-m.b})`)
+     .call(d3.axisBottom(x).tickValues(t.filter((d,i)=>i%step===0).map(d=>d.year)).tickSize(0))
+     .call(g=>g.select(".domain").attr("stroke","#e3e8ee")).selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
+  svg.append("g").attr("transform",`translate(${m.l},0)`)
+     .call(d3.axisLeft(y).ticks(4).tickFormat(v=>"$"+(v/1e6).toFixed(0)+"M").tickSize(-(W-m.l-m.r)))
+     .call(g=>g.select(".domain").remove()).call(g=>g.selectAll("line").attr("stroke","#eef2f6"))
+     .selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
+  const area=d3.area().x(d=>x(d.year)).y0(H-m.b).y1(d=>y(d.amount)).curve(d3.curveMonotoneX);
+  const line=d3.line().x(d=>x(d.year)).y(d=>y(d.amount)).curve(d3.curveMonotoneX);
+  svg.append("path").datum(t).attr("fill","rgba(0,48,87,.10)").attr("d",area);
+  svg.append("path").datum(t).attr("fill","none").attr("stroke","#003057").attr("stroke-width",2.5).attr("d",line);
+  svg.selectAll("circle").data(t).join("circle").attr("cx",d=>x(d.year)).attr("cy",d=>y(d.amount)).attr("r",3).attr("fill","#B3A369");
+}
+function renderDAgencies(){
+  const d=DOWNSTREAM.familyD; if(!d) return;
+  const a=Object.keys(d.by_agency).map(k=>({label:agencyShort(k),amount:d.by_agency[k].amount}))
+    .sort((x,y)=>y.amount-x.amount).slice(0,8);
+  const max=d3.max(a,x=>x.amount)||1, wpx=150;
+  d3.select("#dagencies").html(a.map(x=>
+    `<div class="darea"><span class="dlab">${x.label}</span><span class="dbar" style="width:${Math.max(8,x.amount/max*wpx)}px"></span><span class="dval">$${(x.amount/1e6).toFixed(1)}M</span></div>`).join(""));
+}
 let downstreamRendered=false;
 function renderDownstream(){
   if(downstreamRendered) return;
-  renderDKPIs(); renderDTrend(); renderDAreas(); renderDFamilies();
+  renderDKPIs(); renderDTrend(); renderDAreas();
+  renderDKPIsFed(); renderDTrendFed(); renderDAgencies();
+  renderDFamilies();
   downstreamRendered=true;
 }
 const _heroSub=document.querySelector(".hero-sub");

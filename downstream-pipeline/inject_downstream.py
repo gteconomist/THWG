@@ -99,19 +99,25 @@ def build_family_d(output_dir: Path):
     if not files:
         return None
     best = max((json.loads(p.read_text()) for p in files), key=lambda s: s.get("D1_total_awards", 0))
-    n = best.get("D1_total_awards", 0)
-    if not n:
+    if not best.get("D1_total_awards", 0):
         return None
-    amt = best.get("D1_total_amount", 0.0)
-    yr = best.get("metric_provenance", {}).get("year_range", [None, None])
-    span = f"{yr[0]}&ndash;{yr[1]}" if yr and yr[0] else "all years"
-    top_agency = next(iter(best.get("by_agency", {})), None)
-    top_txt = f" &middot; {top_agency.replace('Department of ', '')}-led" if top_agency else ""
-    metrics = (f"<b>{n}</b> SBIR/STTR awards &middot; <b>${amt/1e6:.1f}M</b> project value "
-               f"&middot; {span}{top_txt}")
+    by_year = best.get("by_year", {})
+    years = sorted(int(y) for y in by_year if str(y).isdigit())
+    if not years:
+        return None
+    latest = years[-1]
+    ly = by_year.get(str(latest), {"count": 0, "amount": 0.0})
+    # Annual headline (latest year), to match the patents family's unit. The full
+    # decade lives in the trend series (by_year), not blended into the headline.
+    metrics = (f"<b>{ly['count']}</b> SBIR/STTR awards &middot; "
+               f"<b>${ly['amount']/1e6:.1f}M</b> project value &middot; {latest}")
     return {"metrics": metrics,
-            "data": {"total_awards": n, "total_amount": round(amt, 2), "span": span,
-                     "by_year": best.get("by_year", {}), "by_agency": best.get("by_agency", {}),
+            "data": {"latest_year": latest,
+                     "latest_awards": ly["count"], "latest_amount": round(ly["amount"], 2),
+                     "cumulative_awards": best.get("D1_total_awards", 0),
+                     "cumulative_amount": round(best.get("D1_total_amount", 0.0), 2),
+                     "span": [years[0], years[-1]],
+                     "by_year": by_year, "by_agency": best.get("by_agency", {}),
                      "by_program": best.get("by_program", {})}}
 
 
