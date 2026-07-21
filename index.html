@@ -745,7 +745,7 @@ renderDefault();
 const DOWNSTREAM = {
   "meta": {
     "latest_year": 2024,
-    "updated": "2026-07-18",
+    "updated": "2026-07-21",
     "source": "USPTO Open Data Portal + SBIR.gov; benchmarked to NAI Top 100 Universities"
   },
   "familyB": {
@@ -1075,34 +1075,39 @@ function renderDKPIs(){
   all.select(".v").html(d=>d.v); all.select(".l").html(d=>d.l);
   d3.select("#dbench").html(`<span class="bk">&#10003;</span><span>Validated: our ${fmtInt(b.latest.patents)} matches ${b.benchmark.value} reported by the ${b.benchmark.source} (USPTO grant data) &mdash; ${b.benchmark.pct}% capture.</span>`);
 }
-function renderDTrend(){
-  const t=DOWNSTREAM.familyB.trend.slice().sort((a,b)=>a.year-b.year);
-  const host=d3.select("#dtrend"); host.html("");
-  if(t.length<2){
-    host.html(`<div class="ph" style="padding:30px 6px;text-align:center">Latest year: <b style="color:var(--navy);font-size:24px">${fmtInt(t[0].patents)}</b> patents (${t[0].year}).<br><span style="color:var(--muted)">The multi-year trend appears here as prior years are pulled.</span></div>`);
-    return;
-  }
-  const W=380,H=200,m={t:16,r:16,b:26,l:32};
-  const x=d3.scalePoint().domain(t.map(d=>d.year)).range([m.l,W-m.r]);
-  const y=d3.scaleLinear().domain([0,d3.max(t,d=>d.patents)*1.18]).range([H-m.b,m.t]);
+// Shared trend renderer: series=[{year,value}]; opts={stroke,dot,areaFill,yfmt,lfmt}
+function drawTrend(host, series, opts){
+  host.html("");
+  const t=series.slice().sort((a,b)=>a.year-b.year);
+  if(t.length<2){ host.html('<div class="ph" style="padding:26px 6px;text-align:center">One year of data.</div>'); return; }
+  const W=400,H=215,m={t:18,r:22,b:46,l:56};
+  const x=d3.scalePoint().domain(t.map(d=>d.year)).range([m.l,W-m.r]).padding(0.6);
+  const y=d3.scaleLinear().domain([0,d3.max(t,d=>d.value)*1.06]).nice(4).range([H-m.b,m.t]);
   const svg=host.append("svg").attr("viewBox",`0 0 ${W} ${H}`);
-  const step=Math.ceil(t.length/6);
-  svg.append("g").attr("transform",`translate(0,${H-m.b})`)
-     .call(d3.axisBottom(x).tickValues(t.filter((d,i)=>i%step===0).map(d=>d.year)).tickSize(0))
-     .call(g=>g.select(".domain").attr("stroke","#e3e8ee"))
-     .selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
+  // y gridlines + labels (ticks derived from the nice'd domain so the top line always clears the data)
   svg.append("g").attr("transform",`translate(${m.l},0)`)
-     .call(d3.axisLeft(y).ticks(4).tickSize(-(W-m.l-m.r)))
+     .call(d3.axisLeft(y).tickValues(y.ticks(4)).tickFormat(opts.yfmt).tickSize(-(W-m.l-m.r)))
      .call(g=>g.select(".domain").remove())
      .call(g=>g.selectAll("line").attr("stroke","#eef2f6"))
      .selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
-  const area=d3.area().x(d=>x(d.year)).y0(H-m.b).y1(d=>y(d.patents)).curve(d3.curveMonotoneX);
-  const line=d3.line().x(d=>x(d.year)).y(d=>y(d.patents)).curve(d3.curveMonotoneX);
-  svg.append("path").datum(t).attr("fill","rgba(179,163,105,.18)").attr("d",area);
-  svg.append("path").datum(t).attr("fill","none").attr("stroke","#B3A369").attr("stroke-width",2.5).attr("d",line);
-  svg.selectAll("circle").data(t).join("circle").attr("cx",d=>x(d.year)).attr("cy",d=>y(d.patents)).attr("r",3).attr("fill","#003057");
-  svg.selectAll(".pl").data(t).join("text").attr("class","pl").attr("x",d=>x(d.year)).attr("y",d=>y(d.patents)-8)
-     .attr("text-anchor","middle").attr("font-size",9).attr("font-weight",700).attr("fill","#003057").text(d=>d.patents);
+  // x axis: every year, angled, first year inset off the y-axis
+  svg.append("g").attr("transform",`translate(0,${H-m.b})`)
+     .call(d3.axisBottom(x).tickValues(t.map(d=>d.year)).tickSize(0))
+     .call(g=>g.select(".domain").attr("stroke","#e3e8ee"))
+     .selectAll("text").attr("font-size",9).attr("fill","#5b6670")
+       .style("text-anchor","end").attr("dx","-4").attr("dy","4").attr("transform","rotate(-42)");
+  const area=d3.area().x(d=>x(d.year)).y0(H-m.b).y1(d=>y(d.value)).curve(d3.curveMonotoneX);
+  const line=d3.line().x(d=>x(d.year)).y(d=>y(d.value)).curve(d3.curveMonotoneX);
+  svg.append("path").datum(t).attr("fill",opts.areaFill).attr("d",area);
+  svg.append("path").datum(t).attr("fill","none").attr("stroke",opts.stroke).attr("stroke-width",2.5).attr("d",line);
+  svg.selectAll("circle").data(t).join("circle").attr("cx",d=>x(d.year)).attr("cy",d=>y(d.value)).attr("r",3).attr("fill",opts.dot);
+  const last=t[t.length-1];
+  svg.append("text").attr("x",x(last.year)).attr("y",y(last.value)-10).attr("text-anchor","end")
+     .attr("font-size",10.5).attr("font-weight",700).attr("fill","#003057").text((opts.lfmt||opts.yfmt)(last.value));
+}
+function renderDTrend(){
+  const t=(DOWNSTREAM.familyB.trend||[]).map(d=>({year:d.year,value:d.patents}));
+  drawTrend(d3.select("#dtrend"), t, {stroke:"#B3A369", dot:"#003057", areaFill:"rgba(179,163,105,.18)", yfmt:d3.format(",.0f")});
 }
 function renderDAreas(){
   const a=DOWNSTREAM.familyB.techAreas.slice(0,9);
@@ -1141,26 +1146,9 @@ function renderDKPIsFed(){
 }
 function renderDTrendFed(){
   const d=DOWNSTREAM.familyD; if(!d) return;
-  const t=Object.keys(d.by_year).map(y=>({year:+y,amount:d.by_year[y].amount})).sort((a,b)=>a.year-b.year);
-  const host=d3.select("#dtrendFed"); host.html("");
-  if(t.length<2){ host.html('<div class="ph" style="padding:26px 6px;text-align:center">One year of data.</div>'); return; }
-  const W=380,H=200,m={t:16,r:16,b:26,l:42};
-  const x=d3.scalePoint().domain(t.map(d=>d.year)).range([m.l,W-m.r]);
-  const y=d3.scaleLinear().domain([0,d3.max(t,d=>d.amount)*1.18]).range([H-m.b,m.t]);
-  const svg=host.append("svg").attr("viewBox",`0 0 ${W} ${H}`);
-  const step=Math.ceil(t.length/6);
-  svg.append("g").attr("transform",`translate(0,${H-m.b})`)
-     .call(d3.axisBottom(x).tickValues(t.filter((d,i)=>i%step===0).map(d=>d.year)).tickSize(0))
-     .call(g=>g.select(".domain").attr("stroke","#e3e8ee")).selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
-  svg.append("g").attr("transform",`translate(${m.l},0)`)
-     .call(d3.axisLeft(y).ticks(4).tickFormat(v=>"$"+(v/1e6).toFixed(0)+"M").tickSize(-(W-m.l-m.r)))
-     .call(g=>g.select(".domain").remove()).call(g=>g.selectAll("line").attr("stroke","#eef2f6"))
-     .selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
-  const area=d3.area().x(d=>x(d.year)).y0(H-m.b).y1(d=>y(d.amount)).curve(d3.curveMonotoneX);
-  const line=d3.line().x(d=>x(d.year)).y(d=>y(d.amount)).curve(d3.curveMonotoneX);
-  svg.append("path").datum(t).attr("fill","rgba(0,48,87,.10)").attr("d",area);
-  svg.append("path").datum(t).attr("fill","none").attr("stroke","#003057").attr("stroke-width",2.5).attr("d",line);
-  svg.selectAll("circle").data(t).join("circle").attr("cx",d=>x(d.year)).attr("cy",d=>y(d.amount)).attr("r",3).attr("fill","#B3A369");
+  const t=Object.keys(d.by_year).map(y=>({year:+y,value:d.by_year[y].amount}));
+  drawTrend(d3.select("#dtrendFed"), t, {stroke:"#003057", dot:"#B3A369", areaFill:"rgba(0,48,87,.10)",
+    yfmt:v=>"$"+(v/1e6).toFixed(0)+"M", lfmt:v=>"$"+(v/1e6).toFixed(1)+"M"});
 }
 function renderDAgencies(){
   const d=DOWNSTREAM.familyD; if(!d) return;
@@ -1188,26 +1176,8 @@ function renderDKPIsTal(){
 }
 function renderDTrendTal(){
   const d=DOWNSTREAM.familyF; if(!d) return;
-  const t=(d.trend||[]).slice().sort((a,b)=>a.year-b.year);
-  const host=d3.select("#dtrendTal"); host.html("");
-  if(t.length<2){ host.html('<div class="ph" style="padding:26px 6px;text-align:center">One year of data.</div>'); return; }
-  const W=380,H=200,m={t:16,r:16,b:26,l:46};
-  const x=d3.scalePoint().domain(t.map(d=>d.year)).range([m.l,W-m.r]);
-  const y=d3.scaleLinear().domain([0,d3.max(t,d=>d.degrees)*1.18]).range([H-m.b,m.t]);
-  const svg=host.append("svg").attr("viewBox",`0 0 ${W} ${H}`);
-  const step=Math.ceil(t.length/6);
-  svg.append("g").attr("transform",`translate(0,${H-m.b})`)
-     .call(d3.axisBottom(x).tickValues(t.filter((d,i)=>i%step===0).map(d=>d.year)).tickSize(0))
-     .call(g=>g.select(".domain").attr("stroke","#e3e8ee")).selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
-  svg.append("g").attr("transform",`translate(${m.l},0)`)
-     .call(d3.axisLeft(y).ticks(4).tickFormat(v=>d3.format(",.0f")(v)).tickSize(-(W-m.l-m.r)))
-     .call(g=>g.select(".domain").remove()).call(g=>g.selectAll("line").attr("stroke","#eef2f6"))
-     .selectAll("text").attr("font-size",9.5).attr("fill","#5b6670");
-  const area=d3.area().x(d=>x(d.year)).y0(H-m.b).y1(d=>y(d.degrees)).curve(d3.curveMonotoneX);
-  const line=d3.line().x(d=>x(d.year)).y(d=>y(d.degrees)).curve(d3.curveMonotoneX);
-  svg.append("path").datum(t).attr("fill","rgba(179,163,105,.18)").attr("d",area);
-  svg.append("path").datum(t).attr("fill","none").attr("stroke","#B3A369").attr("stroke-width",2.5).attr("d",line);
-  svg.selectAll("circle").data(t).join("circle").attr("cx",d=>x(d.year)).attr("cy",d=>y(d.degrees)).attr("r",3).attr("fill","#003057");
+  const t=(d.trend||[]).map(x=>({year:x.year,value:x.degrees}));
+  drawTrend(d3.select("#dtrendTal"), t, {stroke:"#B3A369", dot:"#003057", areaFill:"rgba(179,163,105,.18)", yfmt:d3.format(",.0f")});
 }
 function renderDLevelsTal(){
   const d=DOWNSTREAM.familyF; if(!d) return;
