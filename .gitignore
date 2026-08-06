@@ -3,3 +3,12 @@
 *.xls
 *.csv
 .DS_Store
+
+# Large derived outputs — this repo is public and serves cedr.tech via Pages.
+# ipeds_cache alone is ~83 MB of zips, and git keeps blobs forever once pushed.
+downstream-pipeline/output/
+*.zip
+
+# Exception: data files published alongside the /ruralga explorer are meant
+# to be public, so re-include them despite the *.csv rule above.
+!ruralga/*.csv
