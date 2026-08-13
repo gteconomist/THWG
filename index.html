@@ -191,6 +191,10 @@
   .status.live{background:#e4f3e8;color:#1f7a3d;}
   .status.building{background:#fbf3dd;color:#8a6d1e;}
   .status.planned{background:#eef1f4;color:#5b6670;}
+  .status.preliminary{background:#e8eef5;color:#2f5d80;}
+  .t3note{background:#fbf9f2;border:1px solid var(--line);border-left:3px solid var(--gold);
+          border-radius:10px;padding:12px 15px;margin:0 0 20px;font-size:12.5px;color:#3a434c;line-height:1.55;}
+  .t3note b{color:var(--navy);}
   .darea{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12.5px;}
   .darea .dlab{width:196px;color:#3a434c;flex:none;}
   .darea .dbar{height:12px;border-radius:3px;background:var(--gold);min-width:8px;}
@@ -396,6 +400,22 @@
     <div class="fgrid" id="tier2fams"></div>
 
     <div class="seclabel" style="margin-top:26px">Tier 3 &middot; Diffusion &amp; alumni impact <span>modeled &middot; periodic study</span></div>
+
+    <div id="t3Block">
+    <div class="t3note"><b>Preliminary &mdash; alumni-founded companies.</b>
+      These figures cover companies founded by Georgia Tech <i>alumni</i>. They are not
+      Georgia Tech spin-outs, and no causal claim is made: this is activity at
+      alumni-founded firms, reported separately from the Institute&rsquo;s own output.
+      Licensed-IP and faculty-founded companies (Tier 2) are not yet included. Figures
+      are lower bounds and will be restated &mdash; see the notes below the charts.</div>
+    <div class="kpis" id="dkpisT3"></div>
+    <div class="dgrid2">
+      <div class="panel"><h2>Equity capital raised per year</h2><div class="sub">Georgia-headquartered alumni-founded companies &middot; equity rounds only</div><div id="dtrendT3"></div></div>
+      <div class="panel"><h2>Sector mix</h2><div class="sub" id="dsectorsubT3">Georgia-headquartered companies by primary sector</div><div id="dsectorsT3"></div></div>
+    </div>
+    <div class="foot" id="dfootT3" style="margin-bottom:26px"></div>
+    </div>
+
     <div class="fgrid" id="tier3fams"></div>
 
     <div class="foot" id="dfoot"></div>
@@ -1058,8 +1078,155 @@ const DOWNSTREAM = {
   }
 };
 /* DOWNSTREAM_DATA_END */
+
+/* ---- Tier 3 alumni entrepreneurship (PRELIMINARY) ----------------------------
+   Defined OUTSIDE the DOWNSTREAM_DATA block on purpose: inject_downstream.py
+   regenerates everything between DOWNSTREAM_DATA_START/END, so anything placed
+   in there would be destroyed on the next pipeline run. This survives it.
+   Source: PitchBook v2 delivery 2026-08-12 + CEDR post-processing.
+   Regenerate from downstream-pipeline/output/tier3_alumni_metrics.json.        */
+const DOWNSTREAM_T3 = {
+  "headline": {
+    "companies_verified": 1030,
+    "ga_companies": 321,
+    "ga_employees": 26917,
+    "ga_employees_reporting": 244,
+    "ga_equity_capital_musd": 5053.5,
+    "ga_exits": 29,
+    "total_equity_capital_musd": 17540.3,
+    "total_exits": 75
+  },
+  "capital": [
+    {
+      "year": 2015,
+      "value": 89.4,
+      "deals": 16
+    },
+    {
+      "year": 2016,
+      "value": 15.4,
+      "deals": 8
+    },
+    {
+      "year": 2017,
+      "value": 291.1,
+      "deals": 18
+    },
+    {
+      "year": 2018,
+      "value": 230.1,
+      "deals": 20
+    },
+    {
+      "year": 2019,
+      "value": 212.8,
+      "deals": 14
+    },
+    {
+      "year": 2020,
+      "value": 510.2,
+      "deals": 30
+    },
+    {
+      "year": 2021,
+      "value": 923.2,
+      "deals": 31
+    },
+    {
+      "year": 2022,
+      "value": 562.3,
+      "deals": 35
+    },
+    {
+      "year": 2023,
+      "value": 249.5,
+      "deals": 25
+    },
+    {
+      "year": 2024,
+      "value": 459.1,
+      "deals": 28
+    },
+    {
+      "year": 2025,
+      "value": 585.9,
+      "deals": 19
+    }
+  ],
+  "exits": [
+    {
+      "year": 2015,
+      "exits": 2
+    },
+    {
+      "year": 2016,
+      "exits": 2
+    },
+    {
+      "year": 2020,
+      "exits": 1
+    },
+    {
+      "year": 2021,
+      "exits": 4
+    },
+    {
+      "year": 2022,
+      "exits": 2
+    },
+    {
+      "year": 2023,
+      "exits": 2
+    },
+    {
+      "year": 2024,
+      "exits": 2
+    },
+    {
+      "year": 2025,
+      "exits": 4
+    }
+  ],
+  "sectors": [
+    {
+      "sector": "Information Technology",
+      "companies": 146
+    },
+    {
+      "sector": "Business Products and Services (B2B)",
+      "companies": 61
+    },
+    {
+      "sector": "Healthcare",
+      "companies": 44
+    },
+    {
+      "sector": "Consumer Products and Services (B2C)",
+      "companies": 37
+    },
+    {
+      "sector": "Financial Services",
+      "companies": 17
+    },
+    {
+      "sector": "Energy",
+      "companies": 7
+    }
+  ]
+};
+
+/* Patch the Tier 3 family card. Also outside the regenerated block, so a pipeline
+   run that rewrites FAMILIES back to "planned" is corrected again at load time. */
+if (DOWNSTREAM.families && DOWNSTREAM.families.tier3 && DOWNSTREAM.families.tier3[0]) {
+  DOWNSTREAM.families.tier3[0].status  = "preliminary";
+  DOWNSTREAM.families.tier3[0].metrics =
+    "<b>" + DOWNSTREAM_T3.headline.ga_companies + "</b> Georgia companies &middot; <b>$"
+    + (DOWNSTREAM_T3.headline.ga_equity_capital_musd/1000).toFixed(2)
+    + "B</b> equity capital &middot; <b>"
+    + DOWNSTREAM_T3.headline.ga_employees.toLocaleString() + "</b> employees";
+}
 const fmtInt = d3.format(",.0f");
-function dStatusChip(s){ const l={live:"Live",building:"In development",planned:"Planned"}[s]||s; return `<span class="status ${s}">${l}</span>`; }
+function dStatusChip(s){ const l={live:"Live",building:"In development",planned:"Planned",preliminary:"Preliminary"}[s]||s; return `<span class="status ${s}">${l}</span>`; }
 function renderDKPIs(){
   const b=DOWNSTREAM.familyB, y=b.latest.year;
   const cards=[
@@ -1189,6 +1356,44 @@ function renderDLevelsTal(){
   d3.select("#dlevelsTal").html(a.map(x=>
     `<div class="darea"><span class="dlab">${x.label}</span><span class="dbar" style="width:${Math.max(8,x.v/max*wpx)}px"></span><span class="dval">${fmtInt(x.v)}</span></div>`).join(""));
 }
+function renderT3(){
+  const T=DOWNSTREAM_T3, h=T.headline;
+  const cards=[
+    {v:fmtInt(h.ga_companies),                          l:"Georgia-headquartered companies"},
+    {v:"$"+(h.ga_equity_capital_musd/1000).toFixed(2)+"B", l:"Equity capital raised &middot; 2010&ndash;2025"},
+    {v:fmtInt(h.ga_employees),                          l:"Employees at Georgia companies&#8202;<sup>&dagger;</sup>"},
+    {v:fmtInt(h.ga_exits),                              l:"Companies reaching a liquidity event"}
+  ];
+  const sel=d3.select("#dkpisT3").selectAll(".kpi").data(cards);
+  const ent=sel.enter().append("div").attr("class","kpi");
+  ent.append("div").attr("class","v"); ent.append("div").attr("class","l");
+  const all=ent.merge(sel);
+  all.select(".v").html(d=>d.v); all.select(".l").html(d=>d.l);
+
+  drawTrend(d3.select("#dtrendT3"), T.capital.map(d=>({year:d.year,value:d.value})),
+    {stroke:"#B3A369", dot:"#003057", areaFill:"rgba(179,163,105,.18)",
+     yfmt:v=>"$"+d3.format(",.0f")(v)+"M", lfmt:v=>"$"+d3.format(",.0f")(v)+"M"});
+
+  const s=T.sectors, max=d3.max(s,d=>d.companies)||1, wpx=150;
+  d3.select("#dsectorsubT3").html("Georgia-headquartered companies by primary sector &middot; n="+fmtInt(h.ga_companies));
+  d3.select("#dsectorsT3").html(s.map(d=>
+    `<div class="darea"><span class="dlab">${d.sector}</span><span class="dbar" style="width:${Math.max(8,d.companies/max*wpx)}px"></span><span class="dval">${d.companies}</span></div>`).join(""));
+
+  d3.select("#dfootT3").html(
+    '<b>How these are built:</b> '+fmtInt(h.companies_verified)+' companies founded by Georgia Tech alumni, '+
+    'identified through founder-education records in PitchBook. Companies were excluded where the '+
+    'record shows only that a founder <i>studied at</i> Georgia Tech, which can include exchange '+
+    'terms &mdash; a confirmable degree is required. Capital counts equity rounds only, excluding '+
+    'grants, accelerator admissions, relief lending, secondary transactions and debt; values are '+
+    'disclosed on roughly two-thirds of transactions, so totals are lower bounds. Exits count each '+
+    "company's first liquidity event, never repeat buyouts or investor share sales. "+
+    '<sup>&dagger;</sup>&#8202;Employment reflects the '+fmtInt(h.ga_employees_reporting)+' Georgia '+
+    'companies reporting headcount and excludes one national restaurant-franchise parent whose '+
+    '650,000 franchise-system employees are not comparable to innovation-economy employment. '+
+    '<b>Not reported:</b> Georgia retention, because headquarters-at-founding is unavailable and '+
+    'relocations cannot be identified; and survival rates, because the source retains almost no '+
+    'failed companies. Source: PitchBook, delivery of 12 August 2026, with CEDR post-processing.');
+}
 let downstreamRendered=false;
 function renderDownstream(){
   if(downstreamRendered) return;
@@ -1196,6 +1401,7 @@ function renderDownstream(){
   renderDKPIsFed(); renderDTrendFed(); renderDAgencies();
   renderDKPIsTal(); renderDTrendTal(); renderDLevelsTal();
   renderDFamilies();
+  renderT3();
   downstreamRendered=true;
 }
 const _heroSub=document.querySelector(".hero-sub");
