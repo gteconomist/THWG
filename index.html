@@ -393,6 +393,17 @@
     </div>
     </div>
 
+    <div id="licBlock">
+    <div class="seclabel" style="margin-top:26px">Tier 1 &middot; Licensing &amp; startups <span>GT OTL / GTRC &middot; AUTM definitions</span></div>
+    <div class="kpis" id="dkpisLic"></div>
+    <div class="benchpill" id="dcumLic"></div>
+    <div class="dgrid2">
+      <div class="panel"><h2>Licensing income per year</h2><div class="sub">Cash licensing income received &middot; Georgia Tech fiscal years</div><div id="dtrendLic"></div></div>
+      <div class="panel"><h2>Startups formed per year</h2><div class="sub" id="dstartsubLic">Companies formed on a Georgia Tech license</div><div id="dstartsLic"></div></div>
+    </div>
+    <div class="foot" id="dfootLic" style="margin-bottom:26px"></div>
+    </div>
+
     <div class="seclabel">Tier 1 &middot; Scorecard families <span>the full annual picture</span></div>
     <div class="fgrid" id="tier1fams"></div>
 
@@ -765,7 +776,7 @@ renderDefault();
 const DOWNSTREAM = {
   "meta": {
     "latest_year": 2024,
-    "updated": "2026-07-21",
+    "updated": "2026-08-28",
     "source": "USPTO Open Data Portal + SBIR.gov; benchmarked to NAI Top 100 Universities"
   },
   "familyB": {
@@ -876,9 +887,9 @@ const DOWNSTREAM = {
       },
       {
         "name": "Licensing & startups",
-        "status": "building",
+        "status": "live",
         "desc": "Invention disclosures, licenses & options executed, licensing income, and startups formed &mdash; on AUTM's national definitions.",
-        "metrics": "Source: GT OTL + AUTM licensing survey"
+        "metrics": "<b>517</b> invention disclosures (FY2026) &middot; <b>18</b> licenses &amp; options &middot; <b>$2.5M</b> licensing income"
       },
       {
         "name": "Federal innovation funding",
@@ -1075,10 +1086,182 @@ const DOWNSTREAM = {
         "degrees": 12202
       }
     ]
+  },
+  "familyA": {
+    "latest_year": 2026,
+    "span": [
+      2015,
+      2026
+    ],
+    "latest": {
+      "disclosures": 517,
+      "patent_apps": 538,
+      "patents_issued": 134,
+      "licenses": 18,
+      "licenses_to_startups": 14,
+      "income": 2529317,
+      "startups_formed": 9
+    },
+    "cumulative": {
+      "startups_formed": 160,
+      "income": 28921134,
+      "licenses": 312,
+      "disclosures": 3983,
+      "startups_span": [
+        2016,
+        2026
+      ]
+    },
+    "income_trend": [
+      {
+        "year": 2015,
+        "value": 1818803
+      },
+      {
+        "year": 2016,
+        "value": 1155053
+      },
+      {
+        "year": 2017,
+        "value": 1813616
+      },
+      {
+        "year": 2018,
+        "value": 2141477
+      },
+      {
+        "year": 2019,
+        "value": 1939579
+      },
+      {
+        "year": 2020,
+        "value": 2444982
+      },
+      {
+        "year": 2021,
+        "value": 2764456
+      },
+      {
+        "year": 2022,
+        "value": 2774645
+      },
+      {
+        "year": 2023,
+        "value": 3105127
+      },
+      {
+        "year": 2024,
+        "value": 3377296
+      },
+      {
+        "year": 2025,
+        "value": 3056783
+      },
+      {
+        "year": 2026,
+        "value": 2529317
+      }
+    ],
+    "disclosures_trend": [
+      {
+        "year": 2015,
+        "value": 283
+      },
+      {
+        "year": 2016,
+        "value": 322
+      },
+      {
+        "year": 2017,
+        "value": 308
+      },
+      {
+        "year": 2018,
+        "value": 345
+      },
+      {
+        "year": 2019,
+        "value": 292
+      },
+      {
+        "year": 2020,
+        "value": 294
+      },
+      {
+        "year": 2021,
+        "value": 271
+      },
+      {
+        "year": 2022,
+        "value": 244
+      },
+      {
+        "year": 2023,
+        "value": 298
+      },
+      {
+        "year": 2024,
+        "value": 355
+      },
+      {
+        "year": 2025,
+        "value": 454
+      },
+      {
+        "year": 2026,
+        "value": 517
+      }
+    ],
+    "startups_by_year": [
+      {
+        "year": 2016,
+        "value": 4
+      },
+      {
+        "year": 2017,
+        "value": 14
+      },
+      {
+        "year": 2018,
+        "value": 12
+      },
+      {
+        "year": 2019,
+        "value": 12
+      },
+      {
+        "year": 2020,
+        "value": 14
+      },
+      {
+        "year": 2021,
+        "value": 24
+      },
+      {
+        "year": 2022,
+        "value": 18
+      },
+      {
+        "year": 2023,
+        "value": 16
+      },
+      {
+        "year": 2024,
+        "value": 14
+      },
+      {
+        "year": 2025,
+        "value": 23
+      },
+      {
+        "year": 2026,
+        "value": 9
+      }
+    ],
+    "licenses_to_startups_from": 2021
   }
 };
 /* DOWNSTREAM_DATA_END */
-
 /* ---- Tier 3 alumni entrepreneurship (PRELIMINARY) ----------------------------
    Defined OUTSIDE the DOWNSTREAM_DATA block on purpose: inject_downstream.py
    regenerates everything between DOWNSTREAM_DATA_START/END, so anything placed
@@ -1394,12 +1577,64 @@ function renderT3(){
     'relocations cannot be identified; and survival rates, because the source retains almost no '+
     'failed companies. Source: PitchBook, delivery of 12 August 2026, with CEDR post-processing.');
 }
+function renderDKPIsLic(){
+  const d=DOWNSTREAM.familyA, block=document.getElementById("licBlock");
+  if(!d){ if(block) block.hidden=true; return; }
+  const L=d.latest, y="FY"+d.latest_year;
+  const cards=[
+    {v:fmtInt(L.disclosures),                l:"Invention disclosures &middot; "+y},
+    {v:fmtInt(L.licenses),                   l:"Licenses &amp; options executed &middot; "+y},
+    {v:"$"+(L.income/1e6).toFixed(1)+"M",    l:"Licensing income &middot; "+y},
+    {v:fmtInt(L.startups_formed),            l:"Startups formed &middot; "+y}
+  ];
+  const sel=d3.select("#dkpisLic").selectAll(".kpi").data(cards);
+  const ent=sel.enter().append("div").attr("class","kpi");
+  ent.append("div").attr("class","v"); ent.append("div").attr("class","l");
+  const all=ent.merge(sel);
+  all.select(".v").html(x=>x.v); all.select(".l").html(x=>x.l);
+  const c=d.cumulative, ss=c.startups_span;
+  d3.select("#dcumLic").html('<span class="bk">&#931;</span><span>Cumulative FY'+d.span[0]+'&ndash;FY'+d.span[1]+': '
+    +fmtInt(c.disclosures)+' invention disclosures, '+fmtInt(c.licenses)+' licenses &amp; options executed, $'
+    +(c.income/1e6).toFixed(1)+'M licensing income'
+    +(ss?', and '+fmtInt(c.startups_formed)+' startups formed (FY'+ss[0]+'&ndash;FY'+ss[1]+')':'')+'.</span>');
+}
+function renderDTrendLic(){
+  const d=DOWNSTREAM.familyA; if(!d) return;
+  drawTrend(d3.select("#dtrendLic"), d.income_trend, {stroke:"#003057", dot:"#B3A369",
+    areaFill:"rgba(0,48,87,.10)", yfmt:v=>"$"+(v/1e6).toFixed(1)+"M", lfmt:v=>"$"+(v/1e6).toFixed(2)+"M"});
+}
+function renderDStartsLic(){
+  const d=DOWNSTREAM.familyA; if(!d) return;
+  const a=(d.startups_by_year||[]); if(!a.length) return;
+  const max=d3.max(a,x=>x.value)||1, wpx=150;
+  d3.select("#dstartsubLic").html("Companies formed on a Georgia Tech license &middot; FY"+a[0].year+"&ndash;FY"+a[a.length-1].year);
+  d3.select("#dstartsLic").html(a.slice().reverse().map(x=>
+    `<div class="darea"><span class="dlab">FY${x.year}</span><span class="dbar" style="width:${Math.max(8,x.value/max*wpx)}px"></span><span class="dval">${x.value}</span></div>`).join(""));
+}
+function renderDFootLic(){
+  const d=DOWNSTREAM.familyA; if(!d) return;
+  const L=d.latest;
+  d3.select("#dfootLic").html(
+    '<b>How these are built:</b> Reported directly by the Georgia Tech Office of Technology '+
+    'Licensing / GTRC on the AUTM Licensing Survey definitions, by Georgia Tech fiscal year '+
+    '(July&ndash;June; FY'+d.latest_year+' = July '+(d.latest_year-1)+'&ndash;June '+d.latest_year+'). '+
+    'Licensing income is cash <i>received</i> during the year &mdash; running royalties, cash-out '+
+    'payments and fees &mdash; not the market value of the licensed technology. In FY'+d.latest_year+' the '+
+    'Institute also took in '+fmtInt(L.patent_apps)+' new U.S. patent applications filed and '+
+    fmtInt(L.patents_issued)+' patents issued on GT intellectual property, and '+fmtInt(L.licenses_to_startups)+
+    ' of the '+fmtInt(L.licenses)+' licenses and options executed went to startup companies. '+
+    (d.licenses_to_startups_from ? 'Licenses to startups are tracked from FY'+d.licenses_to_startups_from+
+      ' forward; earlier years are not reported and are left blank rather than shown as zero. ' : '')+
+    'Counts are annual and directly auditable &mdash; no modeling, no attribution assumptions. '+
+    'Source: GT OTL / GTRC internal intake, matching the figures Georgia Tech reports to AUTM.');
+}
 let downstreamRendered=false;
 function renderDownstream(){
   if(downstreamRendered) return;
   renderDKPIs(); renderDTrend(); renderDAreas();
   renderDKPIsFed(); renderDTrendFed(); renderDAgencies();
   renderDKPIsTal(); renderDTrendTal(); renderDLevelsTal();
+  renderDKPIsLic(); renderDTrendLic(); renderDStartsLic(); renderDFootLic();
   renderDFamilies();
   renderT3();
   downstreamRendered=true;

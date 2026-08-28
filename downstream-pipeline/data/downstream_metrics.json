@@ -1,7 +1,7 @@
 {
   "meta": {
     "latest_year": 2024,
-    "updated": "2026-07-18",
+    "updated": "2026-08-28",
     "source": "USPTO Open Data Portal + SBIR.gov; benchmarked to NAI Top 100 Universities"
   },
   "familyB": {
@@ -112,9 +112,9 @@
       },
       {
         "name": "Licensing & startups",
-        "status": "building",
+        "status": "live",
         "desc": "Invention disclosures, licenses & options executed, licensing income, and startups formed &mdash; on AUTM's national definitions.",
-        "metrics": "Source: GT OTL + AUTM licensing survey"
+        "metrics": "<b>517</b> invention disclosures (FY2026) &middot; <b>18</b> licenses &amp; options &middot; <b>$2.5M</b> licensing income"
       },
       {
         "name": "Federal innovation funding",
@@ -311,5 +311,178 @@
         "degrees": 12202
       }
     ]
+  },
+  "familyA": {
+    "latest_year": 2026,
+    "span": [
+      2015,
+      2026
+    ],
+    "latest": {
+      "disclosures": 517,
+      "patent_apps": 538,
+      "patents_issued": 134,
+      "licenses": 18,
+      "licenses_to_startups": 14,
+      "income": 2529317,
+      "startups_formed": 9
+    },
+    "cumulative": {
+      "startups_formed": 160,
+      "income": 28921134,
+      "licenses": 312,
+      "disclosures": 3983,
+      "startups_span": [
+        2016,
+        2026
+      ]
+    },
+    "income_trend": [
+      {
+        "year": 2015,
+        "value": 1818803
+      },
+      {
+        "year": 2016,
+        "value": 1155053
+      },
+      {
+        "year": 2017,
+        "value": 1813616
+      },
+      {
+        "year": 2018,
+        "value": 2141477
+      },
+      {
+        "year": 2019,
+        "value": 1939579
+      },
+      {
+        "year": 2020,
+        "value": 2444982
+      },
+      {
+        "year": 2021,
+        "value": 2764456
+      },
+      {
+        "year": 2022,
+        "value": 2774645
+      },
+      {
+        "year": 2023,
+        "value": 3105127
+      },
+      {
+        "year": 2024,
+        "value": 3377296
+      },
+      {
+        "year": 2025,
+        "value": 3056783
+      },
+      {
+        "year": 2026,
+        "value": 2529317
+      }
+    ],
+    "disclosures_trend": [
+      {
+        "year": 2015,
+        "value": 283
+      },
+      {
+        "year": 2016,
+        "value": 322
+      },
+      {
+        "year": 2017,
+        "value": 308
+      },
+      {
+        "year": 2018,
+        "value": 345
+      },
+      {
+        "year": 2019,
+        "value": 292
+      },
+      {
+        "year": 2020,
+        "value": 294
+      },
+      {
+        "year": 2021,
+        "value": 271
+      },
+      {
+        "year": 2022,
+        "value": 244
+      },
+      {
+        "year": 2023,
+        "value": 298
+      },
+      {
+        "year": 2024,
+        "value": 355
+      },
+      {
+        "year": 2025,
+        "value": 454
+      },
+      {
+        "year": 2026,
+        "value": 517
+      }
+    ],
+    "startups_by_year": [
+      {
+        "year": 2016,
+        "value": 4
+      },
+      {
+        "year": 2017,
+        "value": 14
+      },
+      {
+        "year": 2018,
+        "value": 12
+      },
+      {
+        "year": 2019,
+        "value": 12
+      },
+      {
+        "year": 2020,
+        "value": 14
+      },
+      {
+        "year": 2021,
+        "value": 24
+      },
+      {
+        "year": 2022,
+        "value": 18
+      },
+      {
+        "year": 2023,
+        "value": 16
+      },
+      {
+        "year": 2024,
+        "value": 14
+      },
+      {
+        "year": 2025,
+        "value": 23
+      },
+      {
+        "year": 2026,
+        "value": 9
+      }
+    ],
+    "licenses_to_startups_from": 2021
   }
 }

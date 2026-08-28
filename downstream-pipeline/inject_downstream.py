@@ -59,6 +59,11 @@ CPC_LABELS = {
     "H02S": "Solar power", "H02K": "Electric machines",
 }
 
+# Internal-intake metrics that the reporting office only began tracking in a given
+# fiscal year. Earlier cells hold 0 as a placeholder, not a true zero, so they are
+# dropped rather than charted as six flat years of nothing.
+NOT_TRACKED_BEFORE = {"licenses_to_startups": 2021}
+
 # ---- Editorial constants (not data-driven; edit here as families come online) ----
 BENCHMARK = {"source": "NAI 2024 Top 100 U.S. Universities", "value": 102, "pct": 97}
 FAMILIES = {
@@ -124,6 +129,64 @@ def build_family_d(output_dir: Path):
                      "by_program": best.get("by_program", {})}}
 
 
+def build_family_a(output_dir: Path):
+    """Read the GT OTL/GTRC licensing & startups intake, if filled, to bring Family A live."""
+    p = output_dir / "internal_licensing.json"
+    if not p.exists():
+        return None
+    metrics = json.loads(p.read_text()).get("metrics", {})
+
+    def series(key):
+        by = (metrics.get(key) or {}).get("by_year") or {}
+        cut = NOT_TRACKED_BEFORE.get(key)
+        out = {}
+        for y, v in by.items():
+            if not str(y).isdigit():
+                continue
+            y = int(y)
+            if cut and y < cut:
+                continue
+            out[y] = v
+        return dict(sorted(out.items()))
+
+    disc = series("invention_disclosures")
+    apps = series("patent_apps_filed")
+    issued = series("patents_issued")
+    lic = series("licenses_options_executed")
+    licsu = series("licenses_to_startups")
+    inc = series("licensing_income_usd")
+    sform = series("startups_formed")
+    if not (disc or lic or inc):
+        return None
+
+    years = sorted(set(disc) | set(lic) | set(inc) | set(sform))
+    latest = years[-1]
+    g = lambda d: d.get(latest)
+
+    card = (f"<b>{g(disc):,}</b> invention disclosures (FY{latest}) &middot; "
+            f"<b>{g(lic)}</b> licenses &amp; options &middot; "
+            f"<b>${g(inc)/1e6:.1f}M</b> licensing income")
+
+    return {"metrics": card,
+            "data": {
+                "latest_year": latest,
+                "span": [years[0], years[-1]],
+                "latest": {"disclosures": g(disc), "patent_apps": g(apps),
+                           "patents_issued": g(issued), "licenses": g(lic),
+                           "licenses_to_startups": g(licsu), "income": g(inc),
+                           "startups_formed": g(sform)},
+                "cumulative": {"startups_formed": sum(sform.values()),
+                               "income": sum(inc.values()),
+                               "licenses": sum(lic.values()),
+                               "disclosures": sum(disc.values()),
+                               "startups_span": [min(sform), max(sform)] if sform else None},
+                "income_trend": [{"year": y, "value": v} for y, v in inc.items()],
+                "disclosures_trend": [{"year": y, "value": v} for y, v in disc.items()],
+                "startups_by_year": [{"year": y, "value": v} for y, v in sform.items()],
+                "licenses_to_startups_from": NOT_TRACKED_BEFORE.get("licenses_to_startups"),
+            }}
+
+
 def build_family_f(output_dir: Path):
     """Read IPEDS degrees-conferred summary, if present, to bring Family F live."""
     p = output_dir / "ipeds_summary.json"
@@ -172,6 +235,14 @@ def build_data() -> dict:
                 fam["status"] = "live"
                 fam["metrics"] = fd["metrics"]
 
+    # Family A (GT OTL licensing & startups intake) — bring the card live if filled.
+    fa = build_family_a(OUTPUT_DIR)
+    if fa:
+        for fam in families["tier1"]:
+            if fam["name"] == "Licensing & startups":
+                fam["status"] = "live"
+                fam["metrics"] = fa["metrics"]
+
     # Family F (IPEDS degrees) — bring the card live if a summary exists.
     ff = build_family_f(OUTPUT_DIR)
     if ff:
@@ -198,6 +269,8 @@ def build_data() -> dict:
         result["familyD"] = fd["data"]
     if ff:
         result["familyF"] = ff["data"]
+    if fa:
+        result["familyA"] = fa["data"]
     return result
 
 
