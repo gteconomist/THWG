@@ -404,6 +404,16 @@
     <div class="foot" id="dfootLic" style="margin-bottom:26px"></div>
     </div>
 
+    <div id="indBlock">
+    <div class="seclabel" style="margin-top:26px">Tier 1 &middot; Industry research engagement <span>NSF HERD &middot; business-funded R&amp;D</span></div>
+    <div class="kpis" id="dkpisInd"></div>
+    <div class="dgrid2">
+      <div class="panel"><h2>Industry-sponsored research per year</h2><div class="sub">Business-funded R&amp;D expenditures (NSF HERD) &middot; Georgia Tech fiscal years</div><div id="dtrendInd"></div></div>
+      <div class="panel"><h2>Share of total research</h2><div class="sub" id="dsharesubInd">Industry share of total R&amp;D expenditures</div><div id="dshareInd"></div></div>
+    </div>
+    <div class="foot" id="dfootInd" style="margin-bottom:26px"></div>
+    </div>
+
     <div class="seclabel">Tier 1 &middot; Scorecard families <span>the full annual picture</span></div>
     <div class="fgrid" id="tier1fams"></div>
 
@@ -776,7 +786,7 @@ renderDefault();
 const DOWNSTREAM = {
   "meta": {
     "latest_year": 2024,
-    "updated": "2026-08-28",
+    "updated": "2026-08-31",
     "source": "USPTO Open Data Portal + SBIR.gov; benchmarked to NAI Top 100 Universities"
   },
   "familyB": {
@@ -899,9 +909,9 @@ const DOWNSTREAM = {
       },
       {
         "name": "Industry research engagement",
-        "status": "building",
+        "status": "live",
         "desc": "Industry-sponsored research expenditures and active corporate research agreements.",
-        "metrics": "Source: GT research accounting + NSF HERD"
+        "metrics": "<b>$63.5M</b> industry-sponsored research (FY2024) &middot; <b>4.2%</b> of total R&amp;D"
       }
     ],
     "tier2": [
@@ -1259,10 +1269,112 @@ const DOWNSTREAM = {
       }
     ],
     "licenses_to_startups_from": 2021
+  },
+  "familyE": {
+    "latest_year": 2024,
+    "span": [
+      2015,
+      2024
+    ],
+    "latest": {
+      "industry_usd": 63454000,
+      "total_usd": 1528637000,
+      "share": 0.04151018194640062
+    },
+    "peak": {
+      "year": 2023,
+      "industry_usd": 94476000
+    },
+    "cumulative_industry_usd": 625839000,
+    "trend": [
+      {
+        "year": 2015,
+        "value": 41092000
+      },
+      {
+        "year": 2016,
+        "value": 46477000
+      },
+      {
+        "year": 2017,
+        "value": 54282000
+      },
+      {
+        "year": 2018,
+        "value": 57601000
+      },
+      {
+        "year": 2019,
+        "value": 66782000
+      },
+      {
+        "year": 2020,
+        "value": 63120000
+      },
+      {
+        "year": 2021,
+        "value": 56015000
+      },
+      {
+        "year": 2022,
+        "value": 82540000
+      },
+      {
+        "year": 2023,
+        "value": 94476000
+      },
+      {
+        "year": 2024,
+        "value": 63454000
+      }
+    ],
+    "share_trend": [
+      {
+        "year": 2015,
+        "value": 0.05368906541933967
+      },
+      {
+        "year": 2016,
+        "value": 0.05877911638459807
+      },
+      {
+        "year": 2017,
+        "value": 0.06748965872229426
+      },
+      {
+        "year": 2018,
+        "value": 0.06459480917948074
+      },
+      {
+        "year": 2019,
+        "value": 0.06955248409912025
+      },
+      {
+        "year": 2020,
+        "value": 0.0601722803311382
+      },
+      {
+        "year": 2021,
+        "value": 0.05026106322135595
+      },
+      {
+        "year": 2022,
+        "value": 0.06702477090666958
+      },
+      {
+        "year": 2023,
+        "value": 0.06723887607823043
+      },
+      {
+        "year": 2024,
+        "value": 0.04151018194640062
+      }
+    ],
+    "break_year": 2024,
+    "reclass_shift_usd": 30000000
   }
 };
-/* DOWNSTREAM_DATA_END */
-/* ---- Tier 3 alumni entrepreneurship (PRELIMINARY) ----------------------------
+/* DOWNSTREAM_DATA_END *//* ---- Tier 3 alumni entrepreneurship (PRELIMINARY) ----------------------------
    Defined OUTSIDE the DOWNSTREAM_DATA block on purpose: inject_downstream.py
    regenerates everything between DOWNSTREAM_DATA_START/END, so anything placed
    in there would be destroyed on the next pipeline run. This survives it.
@@ -1446,6 +1558,15 @@ function drawTrend(host, series, opts){
      .call(g=>g.select(".domain").attr("stroke","#e3e8ee"))
      .selectAll("text").attr("font-size",9).attr("fill","#5b6670")
        .style("text-anchor","end").attr("dx","-4").attr("dy","4").attr("transform","rotate(-42)");
+  // Optional break marker: dashed rule at a year where the series' definition changed.
+  if(opts.breakYear!=null && x(opts.breakYear)!==undefined){
+    const bx=x(opts.breakYear);
+    svg.append("line").attr("x1",bx).attr("x2",bx).attr("y1",m.t).attr("y2",H-m.b)
+       .attr("stroke","#9a8b55").attr("stroke-width",1).attr("stroke-dasharray","4 3");
+    svg.append("text").attr("x",bx-5).attr("y",m.t+7).attr("text-anchor","end")
+       .attr("font-size",8.5).attr("font-style","italic").attr("fill","#9a8b55")
+       .text(opts.breakLabel||"reporting change");
+  }
   const area=d3.area().x(d=>x(d.year)).y0(H-m.b).y1(d=>y(d.value)).curve(d3.curveMonotoneX);
   const line=d3.line().x(d=>x(d.year)).y(d=>y(d.value)).curve(d3.curveMonotoneX);
   svg.append("path").datum(t).attr("fill",opts.areaFill).attr("d",area);
@@ -1628,6 +1749,52 @@ function renderDFootLic(){
     'Counts are annual and directly auditable &mdash; no modeling, no attribution assumptions. '+
     'Source: GT OTL / GTRC internal intake, matching the figures Georgia Tech reports to AUTM.');
 }
+function renderDKPIsInd(){
+  const d=DOWNSTREAM.familyE, block=document.getElementById("indBlock");
+  if(!d){ if(block) block.hidden=true; return; }
+  const L=d.latest, y="FY"+d.latest_year;
+  const cards=[
+    {v:"$"+(L.industry_usd/1e6).toFixed(1)+"M",              l:"Industry-sponsored R&amp;D &middot; "+y},
+    {v:(L.share*100).toFixed(1)+"%",                          l:"Share of total R&amp;D &middot; "+y},
+    {v:"$"+(d.cumulative_industry_usd/1e6).toFixed(0)+"M",   l:"Cumulative &middot; FY"+d.span[0]+"&ndash;FY"+d.span[1]},
+    {v:"$"+(d.peak.industry_usd/1e6).toFixed(1)+"M",         l:"Peak year &middot; FY"+d.peak.year}
+  ];
+  const sel=d3.select("#dkpisInd").selectAll(".kpi").data(cards);
+  const ent=sel.enter().append("div").attr("class","kpi");
+  ent.append("div").attr("class","v"); ent.append("div").attr("class","l");
+  const all=ent.merge(sel);
+  all.select(".v").html(x=>x.v); all.select(".l").html(x=>x.l);
+}
+function renderDTrendInd(){
+  const d=DOWNSTREAM.familyE; if(!d) return;
+  drawTrend(d3.select("#dtrendInd"), d.trend, {stroke:"#003057", dot:"#B3A369",
+    areaFill:"rgba(0,48,87,.10)", yfmt:v=>"$"+(v/1e6).toFixed(0)+"M", lfmt:v=>"$"+(v/1e6).toFixed(1)+"M",
+    breakYear:d.break_year, breakLabel:"NSF reporting change"});
+}
+function renderDShareInd(){
+  const d=DOWNSTREAM.familyE; if(!d) return;
+  const a=(d.share_trend||[]); if(!a.length) return;
+  const max=d3.max(a,x=>x.value)||1, wpx=150;
+  d3.select("#dsharesubInd").html("Industry share of total R&amp;D expenditures &middot; FY"+a[0].year+"&ndash;FY"+a[a.length-1].year);
+  d3.select("#dshareInd").html(a.slice().reverse().map(x=>
+    `<div class="darea"><span class="dlab">FY${x.year}</span><span class="dbar" style="width:${Math.max(8,x.value/max*wpx)}px"></span><span class="dval">${(x.value*100).toFixed(1)}%</span></div>`).join(""));
+}
+function renderDFootInd(){
+  const d=DOWNSTREAM.familyE; if(!d) return;
+  d3.select("#dfootInd").html(
+    '<b>How these are built:</b> Business-funded R&amp;D expenditures as Georgia Tech reports them to '+
+    'the NSF Higher Education R&amp;D (HERD) Survey, by Georgia Tech fiscal year (July&ndash;June). '+
+    'These are direct corporate investments in Institute research &mdash; sponsored agreements, task orders, '+
+    'consortium memberships and industry-funded centers &mdash; not gifts or philanthropy. '+
+    '<b>Reporting change:</b> beginning FY'+d.break_year+', Georgia Tech revised how it interprets the NSF '+
+    'survey instructions, and roughly $'+(d.reclass_shift_usd/1e6).toFixed(0)+'M per year previously reported '+
+    'as business/industry-funded R&amp;D is now reported as federal (documented in the HERD footnotes). '+
+    'The FY'+(d.break_year-1)+'&rarr;FY'+d.break_year+' decline on the chart is that reclassification, not a '+
+    'loss of industry engagement &mdash; on the prior basis, FY'+d.break_year+' would be roughly level with '+
+    'FY'+d.peak.year+'&rsquo;s $'+(d.peak.industry_usd/1e6).toFixed(1)+'M peak. Behind the total sits a broad '+
+    'base: award-level records for FY2024 show 400+ distinct corporate sponsors, with the ten largest '+
+    'accounting for about a third of dollars. Source: NSF HERD survey / GT research administration.');
+}
 let downstreamRendered=false;
 function renderDownstream(){
   if(downstreamRendered) return;
@@ -1635,6 +1802,7 @@ function renderDownstream(){
   renderDKPIsFed(); renderDTrendFed(); renderDAgencies();
   renderDKPIsTal(); renderDTrendTal(); renderDLevelsTal();
   renderDKPIsLic(); renderDTrendLic(); renderDStartsLic(); renderDFootLic();
+  renderDKPIsInd(); renderDTrendInd(); renderDShareInd(); renderDFootInd();
   renderDFamilies();
   renderT3();
   downstreamRendered=true;

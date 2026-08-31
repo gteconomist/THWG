@@ -64,6 +64,14 @@ CPC_LABELS = {
 # dropped rather than charted as six flat years of nothing.
 NOT_TRACKED_BEFORE = {"licenses_to_startups": 2021}
 
+# Family E: beginning FY2024, GT reinterpreted the NSF HERD instructions and moved
+# roughly $30M/yr from business/industry-funded R&D to federal (noted only in the
+# HERD footnotes). The FY2023->FY2024 drop in the industry series is therefore a
+# reporting change, not a loss of engagement. The site marks the break on the chart
+# and explains it in the footnote.
+HERD_RECLASS_BREAK_YEAR = 2024
+HERD_RECLASS_SHIFT_USD = 30000000  # approximate, per GT research administration
+
 # ---- Editorial constants (not data-driven; edit here as families come online) ----
 BENCHMARK = {"source": "NAI 2024 Top 100 U.S. Universities", "value": 102, "pct": 97}
 FAMILIES = {
@@ -187,6 +195,46 @@ def build_family_a(output_dir: Path):
             }}
 
 
+def build_family_e(output_dir: Path):
+    """Read the GT industry research intake, if filled, to bring Family E live."""
+    p = output_dir / "internal_industry.json"
+    if not p.exists():
+        return None
+    metrics = json.loads(p.read_text()).get("metrics", {})
+
+    def series(key):
+        by = (metrics.get(key) or {}).get("by_year") or {}
+        return dict(sorted((int(y), v) for y, v in by.items() if str(y).isdigit()))
+
+    ind = series("industry_sponsored_research_usd")
+    tot = series("total_research_expenditures_usd")
+    if not ind:
+        return None
+
+    years = sorted(ind)
+    latest = years[-1]
+    share = {y: ind[y] / tot[y] for y in years if tot.get(y)}
+    peak_year = max(ind, key=ind.get)
+
+    card = (f"<b>${ind[latest]/1e6:.1f}M</b> industry-sponsored research (FY{latest})"
+            + (f" &middot; <b>{share[latest]*100:.1f}%</b> of total R&amp;D" if latest in share else ""))
+
+    return {"metrics": card,
+            "data": {
+                "latest_year": latest,
+                "span": [years[0], years[-1]],
+                "latest": {"industry_usd": ind[latest],
+                           "total_usd": tot.get(latest),
+                           "share": share.get(latest)},
+                "peak": {"year": peak_year, "industry_usd": ind[peak_year]},
+                "cumulative_industry_usd": sum(ind.values()),
+                "trend": [{"year": y, "value": v} for y, v in ind.items()],
+                "share_trend": [{"year": y, "value": share[y]} for y in years if y in share],
+                "break_year": HERD_RECLASS_BREAK_YEAR if HERD_RECLASS_BREAK_YEAR in ind else None,
+                "reclass_shift_usd": HERD_RECLASS_SHIFT_USD,
+            }}
+
+
 def build_family_f(output_dir: Path):
     """Read IPEDS degrees-conferred summary, if present, to bring Family F live."""
     p = output_dir / "ipeds_summary.json"
@@ -251,6 +299,14 @@ def build_data() -> dict:
                 fam["status"] = "live"
                 fam["metrics"] = ff["metrics"]
 
+    # Family E (industry research intake) — bring the card live if filled.
+    fe = build_family_e(OUTPUT_DIR)
+    if fe:
+        for fam in families["tier1"]:
+            if fam["name"] == "Industry research engagement":
+                fam["status"] = "live"
+                fam["metrics"] = fe["metrics"]
+
     result = {
         "meta": {"latest_year": latest_year,
                  "updated": datetime.date.today().isoformat(),
@@ -271,6 +327,8 @@ def build_data() -> dict:
         result["familyF"] = ff["data"]
     if fa:
         result["familyA"] = fa["data"]
+    if fe:
+        result["familyE"] = fe["data"]
     return result
 
 
